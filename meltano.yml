@@ -1,0 +1,25 @@
+version: 1
+send_anonymous_usage_stats: true
+project_id: "target-clickhouse"
+default_environment: test
+environments:
+- name: test
+plugins:
+  extractors: []
+  loaders:
+  - name: "target-clickhouse"
+    namespace: "target_clickhouse"
+    pip_url: -e .
+    capabilities:
+    - about
+    - stream-maps
+    - record-flattening
+    config:
+      start_date: '2010-01-01T00:00:00Z'
+    settings:
+    # TODO: To configure using Meltano, declare settings and their types here:
+    - name: username
+    - name: password
+      kind: password
+    - name: start_date
+      value: '2010-01-01T00:00:00Z'
