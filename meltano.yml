@@ -5,7 +5,22 @@ default_environment: test
 environments:
 - name: test
 plugins:
-  extractors: []
+  extractors:
+  - name: "tap-smoke-test"
+    namespace: "tap_smoke_test"
+    executable: "tap-smoke-test"
+    pip_url: "git+https://github.com/meltano/tap-smoke-test.git"
+    config:
+      streams:
+      - stream_name: animals
+        "input_filename": "https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/animals-data.jsonl"
+      - stream_name: page_views
+        "input_filename": "https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/pageviews-data.jsonl"
+      stream_maps:
+        "animals":
+          "__key_properties__": ["id"]
+        "page_views":
+          "__key_properties__": ["vistor_id"]
   loaders:
   - name: "target-clickhouse"
     namespace: "target_clickhouse"
@@ -15,6 +30,7 @@ plugins:
     - stream-maps
     - record-flattening
     config:
+      sqlalchemy_url: 'clickhouse+http://default:@localhost:18123'
       start_date: '2010-01-01T00:00:00Z'
     settings:
     # TODO: To configure using Meltano, declare settings and their types here:
