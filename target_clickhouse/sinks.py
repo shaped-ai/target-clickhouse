@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import typing
 from typing import TYPE_CHECKING
 
+import sqlalchemy.types
 from clickhouse_sqlalchemy import (
     Table,
     engines,
 )
+from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.sinks import SQLSink
 from sqlalchemy import Column, MetaData, create_engine
@@ -23,11 +26,11 @@ class ClickhouseConnector(SQLConnector):
     for Clickhouse compatibility.
     """
 
-    allow_column_add: bool = False  # Whether ADD COLUMN is supported.
-    allow_column_rename: bool = False  # Whether RENAME COLUMN is supported.
+    allow_column_add: bool = True  # Whether ADD COLUMN is supported.
+    allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
     allow_column_alter: bool = False  # Whether altering column types is supported.
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
-    allow_temp_tables: bool = False  # Whether temp tables are supported.
+    allow_temp_tables: bool = True  # Whether temp tables are supported.
 
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Generates a SQLAlchemy URL for clickhouse.
@@ -40,6 +43,29 @@ class ClickhouseConnector(SQLConnector):
     def create_engine(self) -> Engine:
         """Create a SQLAlchemy engine for clickhouse."""
         return create_engine(self.get_sqlalchemy_url(self.config))
+
+    def to_sql_type(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+        """Return a JSON Schema representation of the provided type.
+
+        Developers may override this method to accept additional input argument types,
+        to support non-standard types, or to provide custom typing logic.
+
+        Args:
+            jsonschema_type: The JSON Schema representation of the source type.
+
+        Returns:
+            The SQLAlchemy type representation of the data type.
+        """
+        sql_type = th.to_sql_type(jsonschema_type)
+
+        # Clickhouse does not support the DECIMAL type without providing precision,
+        # so we need to use the FLOAT type.
+        if type(sql_type) == sqlalchemy.types.DECIMAL:
+            sql_type = typing.cast(
+                sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT(),
+            )
+
+        return sql_type
 
     def create_empty_table(
         self,
