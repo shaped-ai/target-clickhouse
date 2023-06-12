@@ -38,12 +38,16 @@ target-clickhouse --about --format=markdown
 ```
 -->
 
-A full list of supported settings and capabilities for this
-target is available by running:
+| Setting              | Required | Default | Description |
+|:---------------------|:--------:|:-------:|:------------|
+| sqlalchemy_url       | False    | None    | SQLAlchemy connection string |
+| default_target_schema| False    | None    | The default target database schema name to use for all streams. |
+| stream_maps          | False    | None    | Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). |
+| stream_map_config    | False    | None    | User-defined config values to be used within map expressions. |
+| flattening_enabled   | False    | None    | 'True' to enable schema flattening and automatically expand nested properties. |
+| flattening_max_depth | False    | None    | The max depth to flatten schemas. |
 
-```bash
-target-clickhouse --about
-```
+A full list of supported settings and capabilities is available by running: `target-clickhouse --about`
 
 ### Configure using environment variables
 
