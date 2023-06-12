@@ -22,6 +22,7 @@ clickhouse-sqlalchemy = "^0.2.4"
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
 tox = "^3.25.0"
+ruff = "^0.0.272"
 singer-sdk = { version="^0.27.0", extras = ["testing"] }
 
 [tool.poetry.extras]
@@ -31,6 +32,10 @@ s3 = ["fs-s3fs"]
 ignore = [
     "ANN101",  # missing-type-self
     "ANN102",  # missing-type-cls
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D401", # First line should be in imperative mood
+    "D407", # Missing dashed underline after section
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]
@@ -42,8 +47,8 @@ allow-star-arg-any = true
 [tool.ruff.isort]
 known-first-party = ["target_clickhouse"]
 
-[tool.ruff.pydocstyle]
-convention = "google"
+[tool.ruff.pylint]
+max-args=6
 
 [build-system]
 requires = ["poetry-core>=1.0.8"]

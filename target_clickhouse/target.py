@@ -7,8 +7,9 @@ from target_clickhouse.sinks import (
     ClickhouseSink,
 )
 
+
 class TargetClickhouse(SQLTarget):
-    """Sample target for clickhouse."""
+    """SQL-based target for Clickhouse."""
 
     name = "target-clickhouse"
 
