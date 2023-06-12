@@ -1,23 +1,24 @@
 """clickhouse target sink class, which handles writing streams."""
 
 from __future__ import annotations
-import logging
-from typing import Any, Iterable
 
-from singer_sdk.connectors import SQLConnector
-from singer_sdk.sinks import SQLSink
+from typing import TYPE_CHECKING
 
 from clickhouse_sqlalchemy import (
-    Table, make_session, get_declarative_base, types, engines
+    Table,
+    engines,
 )
-from sqlalchemy import create_engine, MetaData, Column, Table
-from sqlalchemy.engine import Engine
-from singer_sdk import typing as th
+from singer_sdk.connectors import SQLConnector
+from singer_sdk.sinks import SQLSink
+from sqlalchemy import Column, MetaData, Table, create_engine
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
 
 class ClickhouseConnector(SQLConnector):
-    """
-    Clickhouse Meltano Connector.
-    
+    """Clickhouse Meltano Connector.
+
     Inherits from `SQLConnector` class, overriding methods where needed
     for Clickhouse compatibility.
     """
@@ -35,7 +36,7 @@ class ClickhouseConnector(SQLConnector):
             config: The configuration for the connector.
         """
         return super().get_sqlalchemy_url(config)
-    
+
     def create_engine(self) -> Engine:
         """Create a SQLAlchemy engine for clickhouse."""
         return create_engine(self.get_sqlalchemy_url(self.config))
