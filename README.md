@@ -85,6 +85,15 @@ pipx install poetry
 poetry install
 ```
 
+### Start the Clickhouse container
+
+In order to run the tests locally, you must have a Docker daemon running on your host machine.
+
+You can start the Clickhouse container by running:
+```
+./docker_run_clickhouse.sh
+```
+
 ### Create and Run Tests
 
 Create tests within the `tests` subfolder and
