@@ -34,6 +34,3 @@ class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-typ
         https://github.com/meltano/sdk/tree/main/tests/samples
         """
         return "resource"
-
-
-# TODO: Create additional tests as appropriate for your target.

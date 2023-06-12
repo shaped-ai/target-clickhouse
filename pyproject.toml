@@ -32,6 +32,9 @@ s3 = ["fs-s3fs"]
 ignore = [
     "ANN101",  # missing-type-self
     "ANN102",  # missing-type-cls
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D401", # First line should be in imperative mood
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]
@@ -42,9 +45,6 @@ allow-star-arg-any = true
 
 [tool.ruff.isort]
 known-first-party = ["target_clickhouse"]
-
-[tool.ruff.pydocstyle]
-convention = "google"
 
 [tool.ruff.pylint]
 max-args=6
