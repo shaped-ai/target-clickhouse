@@ -46,6 +46,9 @@ known-first-party = ["target_clickhouse"]
 [tool.ruff.pydocstyle]
 convention = "google"
 
+[tool.ruff.pylint]
+max-args=6
+
 [build-system]
 requires = ["poetry-core>=1.0.8"]
 build-backend = "poetry.core.masonry.api"

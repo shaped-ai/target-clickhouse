@@ -10,7 +10,7 @@ from clickhouse_sqlalchemy import (
 )
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.sinks import SQLSink
-from sqlalchemy import Column, MetaData, Table, create_engine
+from sqlalchemy import Column, MetaData, create_engine
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
