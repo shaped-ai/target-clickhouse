@@ -21,7 +21,7 @@ clickhouse-sqlalchemy = "^0.2.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
-tox = "^3.24.4"
+tox = "^3.25.0"
 singer-sdk = { version="^0.27.0", extras = ["testing"] }
 
 [tool.poetry.extras]
