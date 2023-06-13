@@ -14,7 +14,7 @@ SAMPLE_HTTP_CONFIG: dict[str, t.Any] = {
 }
 
 SAMPLE_NATIVE_CONFIG: dict[str, t.Any] = {
-    "sqlalchemy_url": "clickhouse+native://default:@localhost:18123",
+    "sqlalchemy_url": "clickhouse+native://default:@localhost:19000",
 }
 
 # Run standard built-in target tests from the SDK:
@@ -25,7 +25,7 @@ StandardHTTPTargetTests = get_target_test_class(
 
 StandardNativeTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
-    config=SAMPLE_HTTP_CONFIG,
+    config=SAMPLE_NATIVE_CONFIG,
 )
 
 class TestTargetClickhouseHttp(StandardHTTPTargetTests):  # type: ignore[misc, valid-type]  # noqa: E501
