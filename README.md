@@ -41,6 +41,7 @@ target-clickhouse --about --format=markdown
 | Setting              | Required | Default | Description |
 |:---------------------|:--------:|:-------:|:------------|
 | sqlalchemy_url       | False    | None    | SQLAlchemy connection string |
+| table_name           | False    | None    | The name of the table to write to. |
 | default_target_schema| False    | None    | The default target database schema name to use for all streams. |
 | stream_maps          | False    | None    | Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). |
 | stream_map_config    | False    | None    | User-defined config values to be used within map expressions. |
