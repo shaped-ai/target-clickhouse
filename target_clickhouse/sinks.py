@@ -95,6 +95,11 @@ class ClickhouseConnector(SQLConnector):
         _ = partition_keys  # Not supported in generic implementation.
 
         _, _, table_name = self.parse_full_table_name(full_table_name)
+
+        # If config table name is set, then use it instead of the table name.
+        if self.config.get("table_name"):
+            table_name = self.config.get("table_name")
+
         # Do not set schema, as it is not supported by Clickhouse.
         meta = MetaData(schema=None, bind=self._engine)
         columns: list[Column] = []
@@ -132,3 +137,20 @@ class ClickhouseSink(SQLSink):
     """clickhouse target sink class."""
 
     connector_class = ClickhouseConnector
+
+    @property
+    def full_table_name(self) -> str:
+        """Return the fully qualified table name.
+
+        Returns
+            The fully qualified table name.
+        """
+        # Use the config table name if set.
+        if self.config.get("table_name"):
+            return self.config.get("table_name")
+
+        return self.connector.get_fully_qualified_name(
+            table_name=self.table_name,
+            schema_name=self.schema_name,
+            db_name=self.database_name,
+        )
