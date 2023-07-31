@@ -94,8 +94,9 @@ class ClickhouseConnector(SQLConnector):
 
         _ = partition_keys  # Not supported in generic implementation.
 
-        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
-        meta = MetaData(schema=schema_name, bind=self._engine)
+        _, _, table_name = self.parse_full_table_name(full_table_name)
+        # Do not set schema, as it is not supported by Clickhouse.
+        meta = MetaData(schema=None, bind=self._engine)
         columns: list[Column] = []
         primary_keys = primary_keys or []
         try:

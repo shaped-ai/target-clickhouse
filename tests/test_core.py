@@ -11,6 +11,7 @@ from target_clickhouse.target import TargetClickhouse
 
 SAMPLE_CONFIG: dict[str, t.Any] = {
     "sqlalchemy_url": "clickhouse+http://default:@localhost:18123",
+    "table_name": "test_table",
 }
 
 # Run standard built-in target tests from the SDK:
