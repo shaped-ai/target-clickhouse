@@ -117,6 +117,16 @@ class ClickhouseConnector(SQLConnector):
         _ = Table(table_name, meta, *columns, table_engine)
         meta.create_all(self._engine)
 
+    def prepare_schema(self, _: str) -> None:
+        """Create the target database schema.
+
+        In Clickhouse, a schema is a database, so this method is a no-op.
+
+        Args:
+            schema_name: The target schema name.
+        """
+        return
+
 class ClickhouseSink(SQLSink):
     """clickhouse target sink class."""
 
