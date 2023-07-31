@@ -20,6 +20,11 @@ class TargetClickhouse(SQLTarget):
             secret=True,  # Flag config as protected.
             description="SQLAlchemy connection string",
         ),
+        th.Property(
+            "table_name",
+            th.StringType,
+            description="Target table name",
+        ),
     ).to_dict()
 
     default_sink_class = ClickhouseSink
