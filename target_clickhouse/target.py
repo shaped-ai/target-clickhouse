@@ -18,12 +18,12 @@ class TargetClickhouse(SQLTarget):
             "sqlalchemy_url",
             th.StringType,
             secret=True,  # Flag config as protected.
-            description="SQLAlchemy connection string",
+            description="The SQLAlchemy connection string for the ClickHouse database",
         ),
         th.Property(
             "table_name",
             th.StringType,
-            description="Target table name",
+            description="The name of the table to write to. Defaults to stream name.",
         ),
     ).to_dict()
 
