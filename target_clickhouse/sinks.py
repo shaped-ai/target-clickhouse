@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import json
 import typing
 from typing import TYPE_CHECKING, Any, Iterable
 
+import simplejson as json
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
     Table,
