@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import typing
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Iterable
 
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
@@ -154,3 +155,32 @@ class ClickhouseSink(SQLSink):
             schema_name=self.schema_name,
             db_name=self.database_name,
         )
+
+    def bulk_insert_records(
+            self,
+            full_table_name: str,
+            schema: dict,
+            records: Iterable[dict[str, Any]],
+        ) -> int | None:
+        """Bulk insert records to an existing destination table.
+
+        The default implementation uses a generic SQLAlchemy bulk insert operation.
+        This method may optionally be overridden by developers in order to provide
+        faster, native bulk uploads.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON schema for the new table, to be used when inferring column
+                names.
+            records: the input records.
+
+        Returns:
+            True if table exists, False if not, None if unsure or undetectable.
+        """
+        # Need to convert any records with a dict type to a JSON string.
+        for record in records:
+            for key, value in record.items():
+                if isinstance(value, dict):
+                    record[key] = json.dumps(value)
+
+        return super().bulk_insert_records(full_table_name, schema, records)
