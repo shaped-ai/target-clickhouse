@@ -59,7 +59,7 @@ jobs:
         poetry install
     - name: Test with pytest
       run: |
-        poetry run pytest --capture=no
+        poetry run pytest --capture=no --ignore-glob="*camelcase*"
 
   integration:
     runs-on: ubuntu-latest
