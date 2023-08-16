@@ -23,7 +23,7 @@ simplejson = "^3.19.1"
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
 tox = "^3.25.0"
-ruff = "^0.0.278"
+ruff = "^0.0.284"
 singer-sdk = { version=">=0.28,<0.32", extras = ["testing"] }
 types-simplejson = "^3.19.0.1"
 
