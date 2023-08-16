@@ -14,6 +14,16 @@ class ClickhouseSink(SQLSink):
     """clickhouse target sink class."""
 
     connector_class = ClickhouseConnector
+    MAX_SIZE_DEFAULT = 100000
+
+    @property
+    def max_size(self) -> int:
+        """Get max batch size.
+
+        Returns
+            Max number of records to batch before `is_full=True`
+        """
+        return self.MAX_SIZE_DEFAULT
 
     @property
     def full_table_name(self) -> str:
@@ -23,8 +33,10 @@ class ClickhouseSink(SQLSink):
             The fully qualified table name.
         """
         # Use the config table name if set.
-        if self.config.get("table_name"):
-            return self.config.get("table_name")
+        _table_name = self.config.get("table_name")
+
+        if _table_name is not None:
+            return _table_name
 
         return self.connector.get_fully_qualified_name(
             table_name=self.table_name,

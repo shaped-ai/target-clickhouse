@@ -52,6 +52,10 @@ known-first-party = ["target_clickhouse"]
 [tool.ruff.pylint]
 max-args=6
 
+[[tool.mypy.overrides]]
+disable_error_code = ["name-defined"]
+ignore_missing_imports = true
+
 [build-system]
 requires = ["poetry-core>=1.5.1"]
 build-backend = "poetry.core.masonry.api"
