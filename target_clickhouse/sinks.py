@@ -14,7 +14,7 @@ class ClickhouseSink(SQLSink):
     """clickhouse target sink class."""
 
     connector_class = ClickhouseConnector
-    MAX_SIZE_DEFAULT = 100000
+    MAX_SIZE_DEFAULT = 50000
 
     @property
     def max_size(self) -> int:
