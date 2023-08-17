@@ -14,7 +14,9 @@ class ClickhouseSink(SQLSink):
     """clickhouse target sink class."""
 
     connector_class = ClickhouseConnector
-    MAX_SIZE_DEFAULT = 50000
+
+    # Investigate larger batch sizes without OOM.
+    MAX_SIZE_DEFAULT = 10000
 
     @property
     def max_size(self) -> int:
