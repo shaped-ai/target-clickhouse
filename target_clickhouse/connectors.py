@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
     Table,
-    engines,
 )
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import Column, MetaData, create_engine
+
+from target_clickhouse.engine_class import create_engine_wrapper, SupportedEngines
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -70,6 +71,7 @@ class ClickhouseConnector(SQLConnector):
         primary_keys: list[str] | None = None,
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT001, FBT002
+        engine_type: str = "MergeTree",  # Default to MergeTree engine
     ) -> None:
         """Create an empty target table, using Clickhouse Engine.
 
@@ -79,7 +81,7 @@ class ClickhouseConnector(SQLConnector):
             primary_keys: list of key properties.
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
-
+            engine_type: Clickhouse engine type. Must be on of the supported engine types.
         Raises:
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
@@ -115,8 +117,15 @@ class ClickhouseConnector(SQLConnector):
                 ),
             )
 
-        table_engine = engines.MergeTree(primary_key=primary_keys)
-        _ = Table(table_name, meta, *columns, table_engine)
+        table_engine = create_engine_wrapper(
+            engine_type=engine_type, primary_keys=primary_keys, config=self.config
+        )
+        
+        table_args = {}
+        if self.config.get("cluster_name"):
+            table_args["clickhouse_cluster"] = self.config.get("cluster_name")
+
+        _ = Table(table_name, meta, *columns, table_engine, **table_args)
         meta.create_all(self._engine)
 
     def prepare_schema(self, _: str) -> None:
