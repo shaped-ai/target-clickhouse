@@ -71,7 +71,6 @@ class ClickhouseConnector(SQLConnector):
         primary_keys: list[str] | None = None,
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT001, FBT002
-        engine_type: str = "MergeTree",  # Default to MergeTree engine
     ) -> None:
         """Create an empty target table, using Clickhouse Engine.
 
@@ -81,7 +80,6 @@ class ClickhouseConnector(SQLConnector):
             primary_keys: list of key properties.
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
-            engine_type: Clickhouse engine type. Must be on of the supported engine types.
         Raises:
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
@@ -102,6 +100,13 @@ class ClickhouseConnector(SQLConnector):
         meta = MetaData(schema=None, bind=self._engine)
         columns: list[Column] = []
         primary_keys = primary_keys or []
+
+        # If config engine type is set, then use it instead of the default engine type.
+        if self.config.get("engine_type"):
+            engine_type = self.config.get("engine_type")
+        else:
+            engine_type = SupportedEngines.MERGE_TREE
+
         try:
             properties: dict = schema["properties"]
         except KeyError as e:

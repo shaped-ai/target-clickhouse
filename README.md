@@ -42,6 +42,7 @@ target-clickhouse --about --format=markdown
 |:---------------------|:--------:|:-------:|:------------|
 | sqlalchemy_url       | False    | None    | SQLAlchemy connection string |
 | table_name           | False    | None    | The name of the table to write to. |
+| engine_type          | False    | MergeTree | The engine type to use for the table. This must be one of the following engine types: MergeTree, ReplacingMergeTree, SummingMergeTree, AggregatingMergeTree, ReplicatedMergeTree, ReplicatedReplacingMergeTree, ReplicatedSummingMergeTree, ReplicatedAggregatingMergeTree. |
 | table_path           | False    | None    | The table path for replicated tables. This is required when using any of the replication engines. Check out the [documentation](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication#replicatedmergetree-parameters) for more information |
 | replica_name         | False    | None    | The `replica_name` for replicated tables. This is required when using any of the replication engines. |
 | cluster_name         | False    | None    | The cluster to create tables in. This is passed as the `clickhouse_cluster` argument when creating a table. [Documentation](https://clickhouse.com/docs/en/sql-reference/distributed-ddl) can be found here. |
