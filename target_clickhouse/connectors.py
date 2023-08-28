@@ -143,15 +143,15 @@ class ClickhouseConnector(SQLConnector):
         """
         return
 
-    @staticmethod
     def get_column_alter_ddl(
+        self,
         table_name: str,
         column_name: str,
         column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
         """Get the alter column DDL statement.
 
-        Override this if your database uses a different syntax for altering columns.
+        Overrides the static method in the base class to support ON CLUSTER.
 
         Args:
             table_name: Fully qualified table name of column to alter.
@@ -161,6 +161,16 @@ class ClickhouseConnector(SQLConnector):
         Returns:
             A sqlalchemy DDL instance.
         """
+        if self.config.get("cluster_name"):
+            return sqlalchemy.DDL(
+                "ALTER TABLE %(table_name)s ON CLUSTER %(cluster_name)s MODIFY COLUMN %(column_name)s %(column_type)s",
+                {
+                    "table_name": table_name,
+                    "column_name": column_name,
+                    "column_type": column_type,
+                    "cluster_name": self.config.get("cluster_name"),
+                },
+            )
         return sqlalchemy.DDL(
             "ALTER TABLE %(table_name)s MODIFY COLUMN %(column_name)s %(column_type)s",
             {
