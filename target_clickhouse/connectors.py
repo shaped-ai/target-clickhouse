@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
     Table,
-    engines,
 )
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import Column, MetaData, create_engine
+
+from target_clickhouse.engine_class import create_engine_wrapper, SupportedEngines
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -79,7 +80,6 @@ class ClickhouseConnector(SQLConnector):
             primary_keys: list of key properties.
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
-
         Raises:
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
@@ -100,6 +100,13 @@ class ClickhouseConnector(SQLConnector):
         meta = MetaData(schema=None, bind=self._engine)
         columns: list[Column] = []
         primary_keys = primary_keys or []
+
+        # If config engine type is set, then use it instead of the default engine type.
+        if self.config.get("engine_type"):
+            engine_type = self.config.get("engine_type")
+        else:
+            engine_type = SupportedEngines.MERGE_TREE
+
         try:
             properties: dict = schema["properties"]
         except KeyError as e:
@@ -115,8 +122,15 @@ class ClickhouseConnector(SQLConnector):
                 ),
             )
 
-        table_engine = engines.MergeTree(primary_key=primary_keys)
-        _ = Table(table_name, meta, *columns, table_engine)
+        table_engine = create_engine_wrapper(
+            engine_type=engine_type, primary_keys=primary_keys, config=self.config
+        )
+        
+        table_args = {}
+        if self.config.get("cluster_name"):
+            table_args["clickhouse_cluster"] = self.config.get("cluster_name")
+
+        _ = Table(table_name, meta, *columns, table_engine, **table_args)
         meta.create_all(self._engine)
 
     def prepare_schema(self, _: str) -> None:
@@ -129,15 +143,15 @@ class ClickhouseConnector(SQLConnector):
         """
         return
 
-    @staticmethod
     def get_column_alter_ddl(
+        self,
         table_name: str,
         column_name: str,
         column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
         """Get the alter column DDL statement.
 
-        Override this if your database uses a different syntax for altering columns.
+        Overrides the static method in the base class to support ON CLUSTER.
 
         Args:
             table_name: Fully qualified table name of column to alter.
@@ -147,6 +161,16 @@ class ClickhouseConnector(SQLConnector):
         Returns:
             A sqlalchemy DDL instance.
         """
+        if self.config.get("cluster_name"):
+            return sqlalchemy.DDL(
+                "ALTER TABLE %(table_name)s ON CLUSTER %(cluster_name)s MODIFY COLUMN %(column_name)s %(column_type)s",
+                {
+                    "table_name": table_name,
+                    "column_name": column_name,
+                    "column_type": column_type,
+                    "cluster_name": self.config.get("cluster_name"),
+                },
+            )
         return sqlalchemy.DDL(
             "ALTER TABLE %(table_name)s MODIFY COLUMN %(column_name)s %(column_type)s",
             {
