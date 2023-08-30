@@ -32,12 +32,17 @@ s3 = ["fs-s3fs"]
 
 [tool.ruff]
 ignore = [
+    "ANN001", # missing-return-type
     "ANN101",  # missing-type-self
     "ANN102",  # missing-type-cls
+    "ANN201",  # missing-return-type-doc
     "D100", # Missing docstring in public module
     "D101", # Missing docstring in public class
+    "D103", # Missing docstring in public function
     "D401", # First line should be in imperative mood
     "D407", # Missing dashed underline after section
+    "FA100", # Forbidden import
+    "SLOT000", # Missing __slots__
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]

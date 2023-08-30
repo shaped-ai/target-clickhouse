@@ -11,7 +11,7 @@ from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import Column, MetaData, create_engine
 
-from target_clickhouse.engine_class import create_engine_wrapper, SupportedEngines
+from target_clickhouse.engine_class import SupportedEngines, create_engine_wrapper
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -80,6 +80,7 @@ class ClickhouseConnector(SQLConnector):
             primary_keys: list of key properties.
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
+
         Raises:
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
@@ -123,9 +124,9 @@ class ClickhouseConnector(SQLConnector):
             )
 
         table_engine = create_engine_wrapper(
-            engine_type=engine_type, primary_keys=primary_keys, config=self.config
+            engine_type=engine_type, primary_keys=primary_keys, config=self.config,
         )
-        
+
         table_args = {}
         if self.config.get("cluster_name"):
             table_args["clickhouse_cluster"] = self.config.get("cluster_name")
@@ -163,7 +164,10 @@ class ClickhouseConnector(SQLConnector):
         """
         if self.config.get("cluster_name"):
             return sqlalchemy.DDL(
-                "ALTER TABLE %(table_name)s ON CLUSTER %(cluster_name)s MODIFY COLUMN %(column_name)s %(column_type)s",
+                (
+                    "ALTER TABLE %(table_name)s ON CLUSTER %(cluster_name)s "
+                    "MODIFY COLUMN %(column_name)s %(column_type)s",
+                ),
                 {
                     "table_name": table_name,
                     "column_name": column_name,

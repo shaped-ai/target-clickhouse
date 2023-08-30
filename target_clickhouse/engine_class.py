@@ -1,5 +1,7 @@
-from clickhouse_sqlalchemy import engines
 from enum import Enum
+from typing import Optional
+
+from clickhouse_sqlalchemy import engines
 
 
 class SupportedEngines(str, Enum):
@@ -19,9 +21,11 @@ ENGINE_MAPPING = {
     SupportedEngines.SUMMING_MERGE_TREE: engines.SummingMergeTree,
     SupportedEngines.AGGREGATING_MERGE_TREE: engines.AggregatingMergeTree,
     SupportedEngines.REPLICATED_MERGE_TREE: engines.ReplicatedMergeTree,
-    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE: engines.ReplicatedReplacingMergeTree,
+    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE:
+        engines.ReplicatedReplacingMergeTree,
     SupportedEngines.REPLICATED_SUMMING_MERGE_TREE: engines.ReplicatedSummingMergeTree,
-    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE: engines.ReplicatedAggregatingMergeTree,
+    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE:
+        engines.ReplicatedAggregatingMergeTree,
 }
 
 
@@ -33,10 +37,11 @@ def get_engine_class(engine_type):
     return ENGINE_MAPPING.get(engine_type)
 
 
-def create_engine_wrapper(engine_type, primary_keys, config: dict | None = None):
+def create_engine_wrapper(engine_type, primary_keys, config: Optional[dict] = None):
     # check if engine type is in supported engines
     if is_supported_engine(engine_type) is False:
-        raise ValueError(f"Engine type {engine_type} is not supported.")
+        msg = f"Engine type {engine_type} is not supported."
+        raise ValueError(msg)
 
     engine_args = {"primary_key": primary_keys}
     if config is not None:
