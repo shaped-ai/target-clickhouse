@@ -25,7 +25,7 @@ class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-typ
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")
-    def resource(self):  # noqa: ANN201
+    def resource(self):
         """Generic external resource.
 
         This fixture is useful for setup and teardown of external resources,
