@@ -42,6 +42,7 @@ ignore = [
     "D401", # First line should be in imperative mood
     "D407", # Missing dashed underline after section
     "FA100", # Forbidden import
+    "SLOT000", # Missing __slots__
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]
