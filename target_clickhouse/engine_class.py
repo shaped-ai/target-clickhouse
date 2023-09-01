@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from clickhouse_sqlalchemy import engines
+from sqlalchemy import func
 
 
 class SupportedEngines(str, Enum):
@@ -37,13 +38,24 @@ def get_engine_class(engine_type):
     return ENGINE_MAPPING.get(engine_type)
 
 
-def create_engine_wrapper(engine_type, primary_keys, config: Optional[dict] = None):
+def create_engine_wrapper(
+    engine_type,
+    primary_keys: List[str],
+    config: Optional[dict] = None,
+):
     # check if engine type is in supported engines
     if is_supported_engine(engine_type) is False:
         msg = f"Engine type {engine_type} is not supported."
         raise ValueError(msg)
 
-    engine_args = {"primary_key": primary_keys}
+    engine_args: dict = {}
+    if len(primary_keys) > 0:
+        engine_args |= {"primary_key": primary_keys}
+    else:
+        # If no primary keys are specified,
+        # then Clickhouse expects the data to be indexed on all fields via tuple().
+        engine_args |= {"order_by": func.tuple()}
+
     if config is not None:
         if engine_type in (
             SupportedEngines.REPLICATED_MERGE_TREE,
@@ -51,10 +63,12 @@ def create_engine_wrapper(engine_type, primary_keys, config: Optional[dict] = No
             SupportedEngines.REPLICATED_SUMMING_MERGE_TREE,
             SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE,
         ):
-            if config.get("table_path"):
-                engine_args["table_path"] = config.get("table_path")
-            if config.get("replica_name"):
-                engine_args["replica_name"] = config.get("replica_name")
+            table_path: Optional[str] = config.get("table_path")
+            if table_path is not None:
+                engine_args |= {"table_path": table_path }
+            replica_name: Optional[str] = config.get("replica_name")
+            if replica_name is not None:
+                engine_args |= {"replica_name": replica_name }
 
         engine_class = get_engine_class(engine_type)
 
