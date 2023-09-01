@@ -50,11 +50,11 @@ def create_engine_wrapper(
 
     engine_args: dict = {}
     if len(primary_keys) > 0:
-        engine_args |= {"primary_key": primary_keys}
+        engine_args["primary_key"] = primary_keys
     else:
         # If no primary keys are specified,
         # then Clickhouse expects the data to be indexed on all fields via tuple().
-        engine_args |= {"order_by": func.tuple()}
+        engine_args["order_by"] = func.tuple()
 
     if config is not None:
         if engine_type in (
@@ -65,10 +65,10 @@ def create_engine_wrapper(
         ):
             table_path: Optional[str] = config.get("table_path")
             if table_path is not None:
-                engine_args |= {"table_path": table_path }
+                engine_args["table_path"] = table_path
             replica_name: Optional[str] = config.get("replica_name")
             if replica_name is not None:
-                engine_args |= {"replica_name": replica_name }
+                engine_args["replica_name"] = replica_name
 
         engine_class = get_engine_class(engine_type)
 
