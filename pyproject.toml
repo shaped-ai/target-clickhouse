@@ -15,7 +15,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "<3.12,>=3.7.1"
-singer-sdk = { version=">=0.28,<0.32" }
+singer-sdk = { version=">=0.28,<0.34" }
 fs-s3fs = { version = "^1.1.1", optional = true }
 clickhouse-sqlalchemy = "^0.2.4"
 simplejson = "^3.19.1"
@@ -24,7 +24,7 @@ simplejson = "^3.19.1"
 pytest = "^7.2.1"
 tox = "^3.25.0"
 ruff = "^0.0.286"
-singer-sdk = { version=">=0.28,<0.32", extras = ["testing"] }
+singer-sdk = { version=">=0.28,<0.34", extras = ["testing"] }
 types-simplejson = "^3.19.0.1"
 
 [tool.poetry.extras]
