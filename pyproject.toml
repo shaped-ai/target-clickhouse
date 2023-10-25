@@ -21,7 +21,7 @@ clickhouse-sqlalchemy = "^0.2.4"
 simplejson = "^3.19.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.2.1"
+pytest = "^7.4.3"
 tox = "^3.25.0"
 ruff = "^0.0.286"
 singer-sdk = { version=">=0.28,<0.32", extras = ["testing"] }
