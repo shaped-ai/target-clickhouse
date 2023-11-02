@@ -20,7 +20,7 @@ StandardTargetTests = get_target_test_class(
     config=TEST_CONFIG,
 )
 
-class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-type]  # noqa: E501
+class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-type]
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")
