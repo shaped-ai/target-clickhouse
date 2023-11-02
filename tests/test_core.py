@@ -5,21 +5,20 @@ from __future__ import annotations
 import typing as t
 
 import pytest
+from clickhouse_driver import Client
 from singer_sdk.testing import get_target_test_class
 
 from target_clickhouse.target import TargetClickhouse
 
-SAMPLE_CONFIG: dict[str, t.Any] = {
+TEST_CONFIG: dict[str, t.Any] = {
     "sqlalchemy_url": "clickhouse+http://default:@localhost:18123",
-    "table_name": "test_table",
 }
 
 # Run standard built-in target tests from the SDK:
 StandardTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
-    config=SAMPLE_CONFIG,
+    config=TEST_CONFIG,
 )
-
 
 class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-type]  # noqa: E501
     """Standard Target Tests."""
@@ -34,4 +33,10 @@ class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-typ
         Example usage can be found in the SDK samples test suite:
         https://github.com/meltano/sdk/tree/main/tests/samples
         """
-        return "resource"
+        return Client(
+            host="localhost",
+            port=19000,
+            user="default",
+            password="",
+            database="default",
+        )
