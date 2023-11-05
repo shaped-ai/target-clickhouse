@@ -1709,6 +1709,17 @@ docs = ["pygments-github-lexers (>=0.0.5)", "sphinx (>=2.0.0)", "sphinxcontrib-a
 testing = ["flaky (>=3.4.0)", "freezegun (>=0.3.11)", "pathlib2 (>=2.3.3)", "psutil (>=5.6.1)", "pytest (>=4.0.0)", "pytest-cov (>=2.5.1)", "pytest-mock (>=1.10.0)", "pytest-randomly (>=1.0.0)"]
 
 [[package]]
+name = "types-setuptools"
+version = "68.2.0.0"
+description = "Typing stubs for setuptools"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-setuptools-68.2.0.0.tar.gz", hash = "sha256:a4216f1e2ef29d089877b3af3ab2acf489eb869ccaf905125c69d2dc3932fd85"},
+    {file = "types_setuptools-68.2.0.0-py3-none-any.whl", hash = "sha256:77edcc843e53f8fc83bb1a840684841f3dc804ec94562623bfa2ea70d5a2ba1b"},
+]
+
+[[package]]
 name = "types-simplejson"
 version = "3.19.0.2"
 description = "Typing stubs for simplejson"
@@ -1913,4 +1924,4 @@ s3 = ["fs-s3fs"]
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "90d42cae3238f131575f78b47564d50148250e07ccab63edba6870d8e4302ce9"
+content-hash = "1e615f9f410e033cd1d17ab4f62bbe9da57511f9216d9ee2e993e7be302877c7"
