@@ -98,7 +98,7 @@ class ClickhouseConnector(SQLConnector):
             table_name = self.config.get("table_name")
 
         # Do not set schema, as it is not supported by Clickhouse.
-        meta = MetaData(schema=None, bind=self._engine)
+        meta = MetaData(schema=None)
         columns: list[Column] = []
         primary_keys = primary_keys or []
 
@@ -143,6 +143,41 @@ class ClickhouseConnector(SQLConnector):
             schema_name: The target schema name.
         """
         return
+
+    @staticmethod
+    def get_column_add_ddl(
+        table_name: str,
+        column_name: str,
+        column_type: sqlalchemy.types.TypeEngine,
+    ) -> sqlalchemy.DDL:
+        """Get the create column DDL statement.
+
+        Override this if your database uses a different syntax for creating columns.
+
+        Args:
+            table_name: Fully qualified table name of column to alter.
+            column_name: Column name to create.
+            column_type: New column sqlalchemy type.
+
+        Returns:
+            A sqlalchemy DDL instance.
+        """
+        create_column_clause = sqlalchemy.schema.CreateColumn(
+            sqlalchemy.Column(
+                column_name,
+                column_type,
+            ),
+        )
+        return sqlalchemy.DDL(
+            (
+                "ALTER TABLE %(table_name)s ADD COLUMN IF NOT EXISTS "
+                "%(create_column_clause)s"
+            ),
+            {
+                "table_name": table_name,
+                "create_column_clause": create_column_clause,
+            },
+        )
 
     def get_column_alter_ddl(
         self,

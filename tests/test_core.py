@@ -23,8 +23,8 @@ StandardTargetTests = get_target_test_class(
 class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-type]
     """Standard Target Tests."""
 
-    @pytest.fixture(scope="class")
-    def resource(self):
+    @pytest.fixture(autouse=True)
+    def _resource(self) -> None:
         """Generic external resource.
 
         This fixture is useful for setup and teardown of external resources,
@@ -33,7 +33,7 @@ class TestTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-typ
         Example usage can be found in the SDK samples test suite:
         https://github.com/meltano/sdk/tree/main/tests/samples
         """
-        return Client(
+        _ = Client(
             host="localhost",
             port=19000,
             user="default",
