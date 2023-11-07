@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
+import jsonschema.exceptions as jsonschema_exceptions
 import simplejson as json
 import sqlalchemy
 from pendulum import now
@@ -133,3 +134,40 @@ class ClickhouseSink(SQLSink):
         )
         with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
             conn.execute(query)
+
+
+    # Override record validation implementation to parse objects that can be stringified
+    # into string fields, ie. numeric or JSON.
+    def _validate_and_parse(self, record: dict) -> dict:
+        """Validate or repair the record, parsing to python-native types as needed.
+
+        Args:
+            record: Individual record in the stream.
+
+        Returns:
+            Validated record.
+        """
+        try:
+            self._validator.validate(record)
+        except jsonschema_exceptions.ValidationError as e:
+            if "is not of type" in e.message and "'string'" in e.message:
+                self.logger.warning(
+                    "Received non valid record for string type, "
+                    "attempting forced conversion to string",
+                )
+                for key, value in record.items():
+                    if isinstance(value, dict):
+                        record[key] = json.dumps(value)
+                    elif not isinstance(value, str):
+                        record[key] = str(value)
+                self.logger.warning("Validating converted record")
+                self._validator.validate(record)
+            else:
+                raise
+
+        self._parse_timestamps_in_record(
+            record=record,
+            schema=self.schema,
+            treatment=self.datetime_error_treatment,
+        )
+        return record
