@@ -47,6 +47,7 @@ ignore = [
     "G004", # Logging statement uses string formatting
     "TCH002",
     "TCH003",
+    "ANN202",
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]

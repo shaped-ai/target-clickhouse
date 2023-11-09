@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Optional
 
@@ -128,3 +129,34 @@ def test_nested_dict_with_nested_non_string():
             isinstance(updated_record["address"]["city"], str)
         ), "The 'city' should have been converted to a string."
         validator.validate(updated_record)  # This should not raise an error
+
+    def test_single_level_schema_nested_dict_to_string():
+        record = {"name": {"first": "John", "last": "Doe"}, "age": 30}
+        try:
+            validator.validate(record)
+        except ValidationError as e:
+            updated_record = handle_validation_error(record, e, logger)
+            assert (
+                isinstance(updated_record["name"], str)
+            ), "The 'name' should have been converted to a JSON string."
+            assert (
+                json.loads(updated_record["name"]) == {"first": "John", "last": "Doe"}
+            ), "The JSON string is not correct."
+
+    def test_single_level_schema_deeply_nested_dict_to_string():
+        record = {"name":
+                  {"first": "John", "last": "Doe",
+                   "nicknames": {"short": "JD", "long": "Johnny"},
+                   },
+                   "age": 30,
+                }
+        try:
+            validator.validate(record)
+        except ValidationError as e:
+            updated_record = handle_validation_error(record, e, logger)
+            assert (
+                isinstance(updated_record["name"], str)
+            ), "The 'name' field should have been converted to a JSON string."
+            assert (
+                "nicknames" in json.loads(updated_record["name"])
+            ), "The JSON string does not correctly represent the nested dict."
