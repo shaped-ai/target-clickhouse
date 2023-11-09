@@ -153,7 +153,7 @@ class ClickhouseSink(SQLSink):
             self._validator.validate(record)
         except jsonschema_exceptions.ValidationError as e:
             record = handle_validation_error(record, e, self.logger)
-            self._validator.validate(record)
+            return self._validate_and_parse(record)
 
         self._parse_timestamps_in_record(
             record=record,
