@@ -1,8 +1,9 @@
 import json
 import logging
-from typing import Optional
 
 from jsonschema import Draft7Validator, ValidationError
+
+from target_clickhouse.sinks import handle_validation_error
 
 # Schema that allows a field to be either a string or null
 schema = {
@@ -20,12 +21,7 @@ nested_schema = {
         "name": {"type": ["string", "null"]},
         "age": {"type": "number"},
         "address": {
-            "type": "object",
-            "properties": {
-                "street": {"type": "string"},
-                "city": {"type": "string"},
-            },
-            "required": ["street", "city"],
+            "type": ["string", "null"],
         },
     },
     "required": ["name", "age", "address"],
@@ -35,36 +31,7 @@ nested_schema = {
 # Validator instance
 validator = Draft7Validator(schema)
 
-# Function to handle validation errors
-def handle_validation_error(record,
-                            e: ValidationError,
-                            logger: Optional[logging.Logger] = None):
-    if "'string'" in e.message:
-        if logger:
-            logger.warning(
-                f"Received non valid record for types 'string', {e.path}, "
-                f"attempting conversion for record, {record}",
-            )
-
-
-        key_path = list(e.path)
-
-        # Access the problematic value using the key_path
-        current_level = record
-        for key in key_path[:-1]:  # Go to parent of the problematic key
-            current_level = current_level[key]
-
-        problem_key = key_path[-1]
-        problem_value = current_level[problem_key]
-
-        # Convert the problematic value to string only if it's not null.
-        if problem_value is not None:
-            current_level[problem_key] = str(problem_value)
-            if logger:
-                logger.warning("Validating converted record")
-            return record
-        return None
-    return None
+nested_validator = Draft7Validator(nested_schema)
 
 # Set up the logger
 logging.basicConfig(level=logging.INFO)
@@ -130,33 +97,53 @@ def test_nested_dict_with_nested_non_string():
         ), "The 'city' should have been converted to a string."
         validator.validate(updated_record)  # This should not raise an error
 
-    def test_single_level_schema_nested_dict_to_string():
-        record = {"name": {"first": "John", "last": "Doe"}, "age": 30}
-        try:
-            validator.validate(record)
-        except ValidationError as e:
-            updated_record = handle_validation_error(record, e, logger)
-            assert (
-                isinstance(updated_record["name"], str)
-            ), "The 'name' should have been converted to a JSON string."
-            assert (
-                json.loads(updated_record["name"]) == {"first": "John", "last": "Doe"}
-            ), "The JSON string is not correct."
+def test_single_level_schema_nested_dict_to_string():
+    record = {"name": {"first": "John", "last": "Doe"}, "age": 30}
+    try:
+        nested_validator.validate(record)
+    except ValidationError as e:
+        updated_record = handle_validation_error(record, e, logger)
+        assert (
+            isinstance(updated_record["name"], str)
+        ), "The 'name' should have been converted to a JSON string."
+        assert (
+            json.loads(updated_record["name"]) == {"first": "John", "last": "Doe"}
+        ), "The JSON string is not correct."
 
-    def test_single_level_schema_deeply_nested_dict_to_string():
-        record = {"name":
-                  {"first": "John", "last": "Doe",
-                   "nicknames": {"short": "JD", "long": "Johnny"},
-                   },
-                   "age": 30,
-                }
-        try:
-            validator.validate(record)
-        except ValidationError as e:
-            updated_record = handle_validation_error(record, e, logger)
-            assert (
-                isinstance(updated_record["name"], str)
-            ), "The 'name' field should have been converted to a JSON string."
-            assert (
-                "nicknames" in json.loads(updated_record["name"])
-            ), "The JSON string does not correctly represent the nested dict."
+def test_single_level_schema_deeply_nested_dict_to_string():
+    record = {
+        "name": "John",
+        "age": 30,
+        "address": {"street": "Main", "city": {"name": "New York"}},
+    }
+    try:
+        nested_validator.validate(record)
+    except ValidationError as e:
+        updated_record = handle_validation_error(record, e, logger)
+        assert (
+            isinstance(updated_record["address"], str)
+        ), "The 'address' field should have been converted to a JSON string."
+        assert (
+            "street" in json.loads(updated_record["address"])
+        ), "The JSON string does not correctly represent the nested dict."
+
+def test_single_level_schema_deeply_nested_list_of_dicts_to_string():
+    record = {
+        "name": "John",
+        "age": 30,
+        "address": [
+            {"street": "Main", "city": {"name": "New York"}},
+            {"street": "Second", "city": {"name": "Los Angeles"}},
+        ],
+    }
+    address_str = json.dumps(record["address"])
+    try:
+        nested_validator.validate(record)
+    except ValidationError as e:
+        updated_record = handle_validation_error(record, e, logger)
+        assert (
+            isinstance(updated_record["address"], str)
+        ), "The 'address' field should have been converted to a JSON string."
+        assert (
+            updated_record["address"] == address_str
+        ), "The JSON string does not correctly represent the nested list of dicts."

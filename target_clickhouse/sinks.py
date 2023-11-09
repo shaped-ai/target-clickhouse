@@ -186,7 +186,7 @@ def handle_validation_error(record,
 
         # Convert the problematic value to string only if it's not null
         if problem_value is not None:
-            if isinstance(problem_value, dict):
+            if isinstance(problem_value, (dict, list)):
                 # Convert the dict to JSON string
                 current_level[problem_key] = json.dumps(problem_value)
             else:
