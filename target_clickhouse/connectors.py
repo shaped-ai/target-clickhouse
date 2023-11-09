@@ -7,6 +7,9 @@ import sqlalchemy.types
 from clickhouse_sqlalchemy import (
     Table,
 )
+from clickhouse_sqlalchemy import (
+    types as clickhouse_sqlalchemy_types,
+)
 from pkg_resources import get_distribution, parse_version
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
@@ -61,6 +64,10 @@ class ClickhouseConnector(SQLConnector):
         if type(sql_type) == sqlalchemy.types.DECIMAL:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT(),
+            )
+        elif type(sql_type) == sqlalchemy.types.INTEGER:
+            sql_type = typing.cast(
+                sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
             )
 
         return sql_type
