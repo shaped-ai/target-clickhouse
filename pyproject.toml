@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shaped-target-clickhouse"
-version = "0.1.2"
+version = "0.1.3"
 description = "`target-clickhouse` is a Singer target for clickhouse, built with the Meltano Singer SDK."
 readme = "README.md"
 authors = ["Ben Theunissen"]
@@ -43,6 +43,11 @@ ignore = [
     "D401", # First line should be in imperative mood
     "D407", # Missing dashed underline after section
     "FA100", # Forbidden import
+    "S101", # Use of assert detected
+    "G004", # Logging statement uses string formatting
+    "TCH002",
+    "TCH003",
+    "ANN202",
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]
