@@ -43,6 +43,10 @@ ignore = [
     "D401", # First line should be in imperative mood
     "D407", # Missing dashed underline after section
     "FA100", # Forbidden import
+    "S101", # Use of assert detected
+    "G004", # Logging statement uses string formatting
+    "TCH002",
+    "TCH003",
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]

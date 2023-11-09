@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Iterable
 
 import jsonschema.exceptions as jsonschema_exceptions
 import simplejson as json
 import sqlalchemy
+from jsonschema import ValidationError
 from pendulum import now
 from singer_sdk.sinks import SQLSink
 from sqlalchemy.sql.expression import bindparam
@@ -150,20 +152,8 @@ class ClickhouseSink(SQLSink):
         try:
             self._validator.validate(record)
         except jsonschema_exceptions.ValidationError as e:
-            if "is not of type" in e.message and "'string'" in e.message:
-                self.logger.warning(
-                    "Received non valid record for string type, "
-                    "attempting forced conversion to string",
-                )
-                for key, value in record.items():
-                    if isinstance(value, dict):
-                        record[key] = json.dumps(value)
-                    elif not isinstance(value, str):
-                        record[key] = str(value)
-                self.logger.warning("Validating converted record")
-                self._validator.validate(record)
-            else:
-                raise
+            record = handle_validation_error(record, e, self.logger)
+            self._validator.validate(record)
 
         self._parse_timestamps_in_record(
             record=record,
@@ -171,3 +161,34 @@ class ClickhouseSink(SQLSink):
             treatment=self.datetime_error_treatment,
         )
         return record
+
+
+def handle_validation_error(record,
+                            e: ValidationError,
+                            logger: logging.Logger | None = None):
+    if "'string'" in e.message:
+        if logger:
+            logger.warning(
+                f"Received non valid record for types 'string', {e.path}, "
+                f"attempting conversion for record, {record}",
+            )
+
+        # e.path is deque which is iterable, we convert it to list to access by index
+        key_path = list(e.path)
+
+        # Access the problematic value using the key_path
+        current_level = record
+        for key in key_path[:-1]:  # Go to the parent level of the problematic key
+            current_level = current_level[key]
+
+        problem_key = key_path[-1]
+        problem_value = current_level[problem_key]
+
+        # Convert the problematic value to string only if it's not null
+        if problem_value is not None:
+            current_level[problem_key] = str(problem_value)
+            if logger:
+                logger.warning("Validating converted record")
+            return record
+        return None
+    return None
