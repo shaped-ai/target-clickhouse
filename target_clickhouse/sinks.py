@@ -168,7 +168,7 @@ def handle_validation_error(record,
                             logger: logging.Logger | None = None):
     if "'string'" in e.message:
         if logger:
-            logger.warning(
+            logger.debug(
                 f"Received non valid record for types 'string', {e.path}, "
                 f"attempting conversion for record, {record}",
             )
@@ -193,7 +193,7 @@ def handle_validation_error(record,
                 current_level[problem_key] = str(problem_value)
 
             if logger:
-                logger.warning("Validating converted record")
+                logger.debug("Validating converted record")
             return record
         return None
     return None
