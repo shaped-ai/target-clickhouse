@@ -175,7 +175,10 @@ class ClickhouseSink(SQLSink):
             expected_type = self.schema.get("properties", {}).get(key, {}).get("type")
             if expected_type == "string" and not isinstance(value, str):
                 # Convert the value to string if it's not already a string.
-                record[key] = str(record[key])
+                record[key] = (
+                    json.dumps(record[key])
+                    if isinstance(value, (dict, list)) else str(value)
+                )
                 if self.logger:
                     self.logger.debug(
                         f"Converted field {key} to string: {record[key]}",
