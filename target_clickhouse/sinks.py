@@ -172,8 +172,8 @@ def handle_validation_error(record,
                 f"Received non valid record for types 'string', {e.path}, "
                 f"attempting conversion for record, {record}",
             )
-
-        # get the parent key path to the problematic value.
+        # Get the parent key path to the problematic value.
+        record = record.copy()
         parent_key = e.path[0]
         problem_value = record[parent_key]
 
