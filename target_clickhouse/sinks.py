@@ -168,32 +168,26 @@ def handle_validation_error(record,
                             logger: logging.Logger | None = None):
     if "'string'" in e.message:
         if logger:
-            logger.warning(
+            logger.debug(
                 f"Received non valid record for types 'string', {e.path}, "
                 f"attempting conversion for record, {record}",
             )
 
-        # e.path is deque which is iterable, we convert it to list to access by index
-        key_path = list(e.path)
+        # get the parent key path to the problematic value.
+        parent_key = e.path[0]
+        problem_value = record[parent_key]
 
-        # Access the problematic value using the key_path
-        current_level = record
-        for key in key_path[:-1]:  # Go to the parent level of the problematic key
-            current_level = current_level[key]
-
-        problem_key = key_path[-1]
-        problem_value = current_level[problem_key]
-
-        # Convert the problematic value to string only if it's not null
+        # Convert the problematic value to string only if it's not null.
         if problem_value is not None:
             if isinstance(problem_value, (dict, list)):
-                # Convert the dict to JSON string
-                current_level[problem_key] = json.dumps(problem_value)
+                # Convert the dict to JSON string.
+                record[parent_key] = json.dumps(problem_value)
             else:
-                current_level[problem_key] = str(problem_value)
+                # Convert the value to string.
+                record[parent_key] = str(problem_value)
 
             if logger:
-                logger.warning("Validating converted record")
+                logger.debug(f"Validating converted record at parent key: {parent_key}")
             return record
         return None
     return None
