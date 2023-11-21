@@ -175,6 +175,10 @@ class ClickhouseSink(SQLSink):
         for key, value in record.items():
             # Checking if the schema expects a string for this key.
             expected_type = self.schema.get("properties", {}).get(key, {}).get("type")
+            if expected_type is None:
+                continue
+            if not isinstance(expected_type, list):
+                expected_type = [expected_type]
             if "string" in expected_type and not isinstance(value, str):
                 # Convert the value to string if it's not already a string.
                 record[key] = (
