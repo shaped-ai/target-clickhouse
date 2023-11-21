@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any, Iterable
 
 import jsonschema.exceptions as jsonschema_exceptions
 import simplejson as json
 import sqlalchemy
-from jsonschema import ValidationError
 from pendulum import now
 from singer_sdk.sinks import SQLSink
 from sqlalchemy.sql.expression import bindparam
@@ -137,9 +135,8 @@ class ClickhouseSink(SQLSink):
         with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
             conn.execute(query)
 
-
     def _validate_and_parse(self, record: dict) -> dict:
-        """Validate or repair the record, parsing to python-native types as needed.
+        """Pre-validate and repair records for string type mismatches, then validate.
 
         Args:
             record: Individual record in the stream.
@@ -147,47 +144,44 @@ class ClickhouseSink(SQLSink):
         Returns:
             Validated record.
         """
-        validation_error = True
-        while validation_error:
-            try:
-                self._validator.validate(record)
-                self._parse_timestamps_in_record(
-                    record=record,
-                    schema=self.schema,
-                    treatment=self.datetime_error_treatment,
-                )
-                validation_error = False
-            except jsonschema_exceptions.ValidationError as e:
-                record = handle_validation_error(record, e, self.logger)
+        # Pre-validate and correct string type mismatches.
+        record = self._pre_validate_for_string_type(record)
+
+        try:
+            self._validator.validate(record)
+            self._parse_timestamps_in_record(
+                record=record,
+                schema=self.schema,
+                treatment=self.datetime_error_treatment,
+            )
+        except jsonschema_exceptions.ValidationError as e:
+            if self.logger:
+                self.logger.exception(f"Record failed validation: {record}")
+            raise e # noqa: RERAISES
 
         return record
 
+    def _pre_validate_for_string_type(self, record: dict) -> dict:
+        """Pre-validate record for string type mismatches and correct them.
 
-def handle_validation_error(record,
-                            e: ValidationError,
-                            logger: logging.Logger | None = None):
-    if "'string'" in e.message:
-        if logger:
-            logger.debug(
-                f"Received non valid record for types 'string', {e.path}, "
-                f"attempting conversion for record, {record}",
-            )
-        # Get the parent key path to the problematic value.
-        record = record.copy()
-        parent_key = e.path[0]
-        problem_value = record[parent_key]
+        Args:
+            record: Individual record in the stream.
 
-        # Convert the problematic value to string only if it's not null.
-        if problem_value is not None:
-            if isinstance(problem_value, (dict, list)):
-                # Convert the dict to JSON string.
-                record[parent_key] = json.dumps(problem_value)
-            else:
-                # Convert the value to string.
-                record[parent_key] = str(problem_value)
+        Returns:
+            Record with corrected string type mismatches.
+        """
+        for key, value in record.items():
+            # Checking if the schema expects a string for this key.
+            expected_type = self.schema.get("properties", {}).get(key, {}).get("type")
+            if expected_type == "string" and not isinstance(value, str):
+                # Convert the value to string if it's not already a string.
+                record[key] = (
+                    json.dumps(value)
+                    if isinstance(value, (dict, list)) else str(value)
+                )
+                if self.logger:
+                    self.logger.debug(
+                        f"Converted field {key} to string: {record[key]}",
+                    )
 
-            if logger:
-                logger.debug(f"Validating converted record at parent key: {parent_key}")
-            return record
-        return None
-    return None
+        return record
