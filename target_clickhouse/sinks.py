@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import decimal
+from collections.abc import MutableMapping
 from typing import Any, Iterable
 
 import jsonschema.exceptions as jsonschema_exceptions
@@ -173,10 +175,10 @@ class ClickhouseSink(SQLSink):
         for key, value in record.items():
             # Checking if the schema expects a string for this key.
             expected_type = self.schema.get("properties", {}).get(key, {}).get("type")
-            if expected_type == "string" and not isinstance(value, str):
+            if "string" in expected_type and not isinstance(value, str):
                 # Convert the value to string if it's not already a string.
                 record[key] = (
-                    json.dumps(value)
+                    json.dumps(record[key])
                     if isinstance(value, (dict, list)) else str(value)
                 )
                 if self.logger:
@@ -184,4 +186,24 @@ class ClickhouseSink(SQLSink):
                         f"Converted field {key} to string: {record[key]}",
                     )
 
-        return record
+        return self._convert_decimal_to_float(record)
+
+    def _convert_decimal_to_float(self, obj):
+        """Recursively convert all Decimal values in a dictionary to floats.
+
+        Args:
+        obj: The input object (dictionary, list, or any other data type).
+
+        Returns:
+        The object with all Decimal values converted to strings.
+        """
+        if isinstance(obj, MutableMapping):
+            for key, value in obj.items():
+                obj[key] = self._convert_decimal_to_float(value)
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                obj[i] = self._convert_decimal_to_float(item)
+        elif isinstance(obj, decimal.Decimal):
+            return float(obj)
+
+        return obj
