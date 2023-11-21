@@ -10,6 +10,9 @@ import jsonschema.exceptions as jsonschema_exceptions
 import simplejson as json
 import sqlalchemy
 from pendulum import now
+from singer_sdk.helpers._typing import (
+    DatetimeErrorTreatmentEnum,
+)
 from singer_sdk.sinks import SQLSink
 from sqlalchemy.sql.expression import bindparam
 
@@ -51,6 +54,11 @@ class ClickhouseSink(SQLSink):
             schema_name=self.schema_name,
             db_name=self.database_name,
         )
+
+    @property
+    def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
+        """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL."""
+        return DatetimeErrorTreatmentEnum.NULL
 
     def bulk_insert_records(
             self,
