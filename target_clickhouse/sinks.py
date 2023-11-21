@@ -186,10 +186,10 @@ class ClickhouseSink(SQLSink):
                         f"Converted field {key} to string: {record[key]}",
                     )
 
-        return self._convert_decimal_to_string(record)
+        return self._convert_decimal_to_float(record)
 
-    def _convert_decimal_to_string(self, obj):
-        """Recursively convert all Decimal values in a dictionary to strings.
+    def _convert_decimal_to_float(self, obj):
+        """Recursively convert all Decimal values in a dictionary to floats.
 
         Args:
         obj: The input object (dictionary, list, or any other data type).
@@ -199,11 +199,11 @@ class ClickhouseSink(SQLSink):
         """
         if isinstance(obj, MutableMapping):
             for key, value in obj.items():
-                obj[key] = self._convert_decimal_to_string(value)
+                obj[key] = self._convert_decimal_to_float(value)
         elif isinstance(obj, list):
             for i, item in enumerate(obj):
-                obj[i] = self._convert_decimal_to_string(item)
+                obj[i] = self._convert_decimal_to_float(item)
         elif isinstance(obj, decimal.Decimal):
-            return str(obj)
+            return float(obj)
 
         return obj
