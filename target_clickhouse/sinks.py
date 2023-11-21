@@ -138,8 +138,6 @@ class ClickhouseSink(SQLSink):
             conn.execute(query)
 
 
-    # Override record validation implementation to parse objects that can be stringified
-    # into string fields, ie. numeric or JSON.
     def _validate_and_parse(self, record: dict) -> dict:
         """Validate or repair the record, parsing to python-native types as needed.
 
@@ -149,17 +147,19 @@ class ClickhouseSink(SQLSink):
         Returns:
             Validated record.
         """
-        try:
-            self._validator.validate(record)
-        except jsonschema_exceptions.ValidationError as e:
-            record = handle_validation_error(record, e, self.logger)
-            return self._validate_and_parse(record)
+        validation_error = True
+        while validation_error:
+            try:
+                self._validator.validate(record)
+                self._parse_timestamps_in_record(
+                    record=record,
+                    schema=self.schema,
+                    treatment=self.datetime_error_treatment,
+                )
+                validation_error = False
+            except jsonschema_exceptions.ValidationError as e:
+                record = handle_validation_error(record, e, self.logger)
 
-        self._parse_timestamps_in_record(
-            record=record,
-            schema=self.schema,
-            treatment=self.datetime_error_treatment,
-        )
         return record
 
 
@@ -172,8 +172,8 @@ def handle_validation_error(record,
                 f"Received non valid record for types 'string', {e.path}, "
                 f"attempting conversion for record, {record}",
             )
-
-        # get the parent key path to the problematic value.
+        # Get the parent key path to the problematic value.
+        record = record.copy()
         parent_key = e.path[0]
         problem_value = record[parent_key]
 
