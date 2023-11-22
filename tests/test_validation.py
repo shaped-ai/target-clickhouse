@@ -33,9 +33,32 @@ nested_schema = {
     "required": ["name", "age", "address"],
 }
 
+list_schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": ["string", "null"]},
+        "age": {"type": "string"},
+        "address": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "street": {"type": ["string", "null"]},
+                    "city": {"type": "string"},
+                    "state": {"type": "string"},
+                    "zip": {"type": "string"},
+                },
+                "required": ["street", "city", "state", "zip"],
+            },
+        },
+    },
+    "required": ["name", "age", "address"],
+}
+
 # Validator instances
 validator = Draft7Validator(schema)
 nested_validator = Draft7Validator(nested_schema)
+list_validator = Draft7Validator(list_schema)
 
 # Set up the logger
 logging.basicConfig(level=logging.INFO)
@@ -104,3 +127,27 @@ def test_multiple_fields_conversion():
     assert (
         isinstance(pre_validated_record["address"]["zip"], str,
     )), "The 'zip' should have been converted to a string."
+
+
+def test_list_of_dicts_conversion():
+    # Test record with list of dicts
+    record = {
+        "name": "John",
+        "age": 30,
+        "address": [
+            {"street": "Main", "city": {"name": "New York"},
+             "state": "NY", "zip": 10001},
+            {"street": "Main", "city": {"name": "New York"},
+             "state": "NY", "zip": 10002},
+        ],
+    }
+    pre_validated_record = pre_validate_for_string_type(record, list_schema)
+    list_validator.validate(pre_validated_record)  # This should not raise an error
+
+    # Asserting the conversions
+    assert (
+        isinstance(pre_validated_record["address"][0]["zip"], str)
+    ), "The 'zip' should have been converted to a string."
+    assert (
+        isinstance(pre_validated_record["address"][1]["zip"], str)
+    ), "The 'zip' should have been converted to a string."
