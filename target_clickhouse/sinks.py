@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import decimal
-from collections.abc import MutableMapping
+from logging import Logger
 from typing import Any, Iterable
 
 import jsonschema.exceptions as jsonschema_exceptions
@@ -155,7 +154,7 @@ class ClickhouseSink(SQLSink):
             Validated record.
         """
         # Pre-validate and correct string type mismatches.
-        record = self._pre_validate_for_string_type(record)
+        record = pre_validate_for_string_type(record, self.schema, self.logger)
 
         try:
             self._validator.validate(record)
@@ -171,51 +170,49 @@ class ClickhouseSink(SQLSink):
 
         return record
 
-    def _pre_validate_for_string_type(self, record: dict) -> dict:
-        """Pre-validate record for string type mismatches and correct them.
+def pre_validate_for_string_type(
+    record: dict,
+    schema: dict,
+    logger: Logger | None = None,
+) -> dict:
+    """Pre-validate record for string type mismatches and correct them.
 
-        Args:
-            record: Individual record in the stream.
+    Args:
+        record: Individual record in the stream.
+        schema: JSON schema for the stream.
+        logger: Logger to use for logging.
 
-        Returns:
-            Record with corrected string type mismatches.
-        """
-        for key, value in record.items():
-            # Checking if the schema expects a string for this key.
-            expected_type = self.schema.get("properties", {}).get(key, {}).get("type")
-            if expected_type is None:
-                continue
-            if not isinstance(expected_type, list):
-                expected_type = [expected_type]
-            if "string" in expected_type and not isinstance(value, str):
-                # Convert the value to string if it's not already a string.
-                record[key] = (
-                    json.dumps(record[key])
-                    if isinstance(value, (dict, list)) else str(value)
+    Returns:
+        Record with corrected string type mismatches.
+    """
+    if schema is None:
+        if logger:
+            logger.debug("Schema is None, skipping pre-validation.")
+        return record
+
+    for key, value in record.items():
+        # Checking if the schema expects a string for this key.
+        expected_type = schema.get("properties", {}).get(key, {}).get("type")
+        if expected_type is None:
+            continue
+        if not isinstance(expected_type, list):
+            expected_type = [expected_type]
+
+        if "object" in expected_type and isinstance(value, dict):
+            pre_validate_for_string_type(
+                value,
+                schema.get("properties", {}).get(key),
+                logger,
+            )
+        elif "string" in expected_type and not isinstance(value, str):
+            # Convert the value to string if it's not already a string.
+            record[key] = (
+                json.dumps(record[key])
+                if isinstance(value, (dict, list)) else str(value)
+            )
+            if logger:
+                logger.debug(
+                    f"Converted field {key} to string: {record[key]}",
                 )
-                if self.logger:
-                    self.logger.debug(
-                        f"Converted field {key} to string: {record[key]}",
-                    )
 
-        return self._convert_decimal_to_string(record)
-
-    def _convert_decimal_to_string(self, obj):
-        """Recursively convert all Decimal values in a dictionary to floats.
-
-        Args:
-        obj: The input object (dictionary, list, or any other data type).
-
-        Returns:
-        The object with all Decimal values converted to strings.
-        """
-        if isinstance(obj, MutableMapping):
-            for key, value in obj.items():
-                obj[key] = self._convert_decimal_to_string(value)
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                obj[i] = self._convert_decimal_to_string(item)
-        elif isinstance(obj, decimal.Decimal):
-            return str(obj)
-
-        return obj
+    return record
