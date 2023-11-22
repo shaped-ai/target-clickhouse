@@ -63,7 +63,7 @@ class ClickhouseConnector(SQLConnector):
         # so we need to use the FLOAT type.
         if type(sql_type) == sqlalchemy.types.DECIMAL:
             sql_type = typing.cast(
-                sqlalchemy.types.TypeEngine, sqlalchemy.types.String(),
+                sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT(),
             )
         elif type(sql_type) == sqlalchemy.types.INTEGER:
             sql_type = typing.cast(
