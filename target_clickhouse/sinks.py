@@ -207,9 +207,9 @@ def pre_validate_for_string_type(
             )
         elif "array" in expected_type and isinstance(value, list):
             items_schema = key_properties.get("items")
-            for item in value:
+            for i, item in enumerate(value):
                 if items_schema["type"] == "object" and isinstance(item, dict):
-                    pre_validate_for_string_type(
+                    value[i] = pre_validate_for_string_type(
                         item,
                         key_properties.get("items"),
                         logger,
