@@ -1,7 +1,8 @@
-import json
 import logging
 
 from jsonschema import Draft7Validator
+
+from target_clickhouse.sinks import pre_validate_for_string_type
 
 # Schema definitions
 schema = {
@@ -17,9 +18,16 @@ nested_schema = {
     "type": "object",
     "properties": {
         "name": {"type": ["string", "null"]},
-        "age": {"type": "number"},
+        "age": {"type": "string"},
         "address": {
-            "type": ["string", "null"],
+            "type": "object",
+            "properties": {
+                "street": {"type": ["string", "null"]},
+                "city": {"type": "string"},
+                "state": {"type": "string"},
+                "zip": {"type": "string"},
+            },
+            "required": ["street", "city", "state", "zip"],
         },
     },
     "required": ["name", "age", "address"],
@@ -32,18 +40,6 @@ nested_validator = Draft7Validator(nested_schema)
 # Set up the logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-def pre_validate_for_string_type(record: dict, schema: dict) -> dict:
-    for key, value in record.items():
-        expected_type = schema.get("properties", {}).get(key, {}).get("type")
-        if "string" in expected_type and not isinstance(value, str):
-            record[key] = (
-                json.dumps(value)
-                if isinstance(value, (dict, list)) else str(value)
-            )
-            if logger:
-                logger.debug(f"Converted field {key} to string: {record[key]}")
-    return record
 
 # Test cases
 def test_validation_string_conversion():
@@ -65,69 +61,46 @@ def test_validation_null_allowed():
 def test_nested_dict_string_conversion():
     record = {
         "name": "John", "age": 30,
-        "address": {"street": 123, "city": "New York"},
+        "address": {"street": 123, "city": "New York", "state": "NY", "zip": "10001"},
     }
-    pre_validated_record = pre_validate_for_string_type(record, nested_schema)
-    validator.validate(pre_validated_record)  # This should not raise an error
-    assert (
-        "street" in json.loads(pre_validated_record["address"])
-    ), "The 'address' should have been converted to a JSON string."
-
-def test_nested_dict_with_nested_non_string():
-    record = {
-        "name": "John", "age": 30,
-        "address": {"street": "Main", "city": {"name": "New York"}},
-    }
-    pre_validated_record = pre_validate_for_string_type(record, nested_schema)
-    validator.validate(pre_validated_record)  # This should not raise an error
-    assert (
-        "city" in json.loads(pre_validated_record["address"])
-    ), "The 'city' should have been converted to a JSON string."
-
-def test_single_level_schema_nested_dict_to_string():
-    record = {"name": {"first": "John", "last": "Doe"}, "age": 30, "address": None}
     pre_validated_record = pre_validate_for_string_type(record, nested_schema)
     nested_validator.validate(pre_validated_record)  # This should not raise an error
     assert (
-        json.loads(pre_validated_record["name"]) == {"first": "John", "last": "Doe"}
-    ), "The JSON string is not correct."
+        pre_validated_record["age"] == "30"
+    ), "The 'age' should have been converted to a string."
 
 def test_single_level_schema_deeply_nested_list_of_dicts_to_string():
     record = {
         "name": "John",
         "age": 30,
-        "address": [
-            {"street": "Main", "city": {"name": "New York"}},
-            {"street": "Second", "city": {"name": "Los Angeles"}},
-        ],
+        "address": {
+            "street": "Main",
+            "city": {"name": "New York"},
+            "state": "NY",
+            "zip": ["10001", "10002"],
+        },
     }
     pre_validated_record = pre_validate_for_string_type(record, nested_schema)
     nested_validator.validate(pre_validated_record)  # This should not raise an error
-    address_list = json.loads(pre_validated_record["address"])
     assert (
-        all("street" in addr for addr in address_list)
-    ), "The JSON string does not correctly represent the nested list of dicts."
+        isinstance(pre_validated_record["address"]["zip"], str)
+    ), "The JSON string does not represent a str."
 
 def test_multiple_fields_conversion():
     # Test record with multiple fields needing conversion
     record = {
         "name": {"first": "John", "last": "Doe"},  # Expected to be a string
         "age": 30,
-        "address": {"street": "Main", "city": {"name": "New York"}},
+        "address": {"street": "Main",
+                    "city": {"name": "New York"}, "state": "NY", "zip": 10001},
     }
     pre_validated_record = pre_validate_for_string_type(record, nested_schema)
     nested_validator.validate(pre_validated_record)  # This should not raise an error
 
     # Asserting the conversions
     assert (
-        isinstance(pre_validated_record["name"], str)
-    ), "The 'name' should have been converted to a JSON string."
+        isinstance(pre_validated_record["address"]["city"], str)
+    ), "The 'city' should have been converted to a string."
     assert (
-        isinstance(pre_validated_record["address"], str,
-    )), "The 'address' should have been converted to a JSON string."
-    assert (
-        json.loads(pre_validated_record["name"]) == {"first": "John", "last": "Doe"}
-    ), "The JSON string for 'name' is not correct."
-    assert (
-        "street" in json.loads(pre_validated_record["address"])
-    ), "The JSON string for 'address' does not correctly represent the nested dict."
+        isinstance(pre_validated_record["address"]["zip"], str,
+    )), "The 'zip' should have been converted to a string."
