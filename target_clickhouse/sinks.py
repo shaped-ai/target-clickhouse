@@ -83,7 +83,7 @@ class ClickhouseSink(SQLSink):
         # Need to convert any records with a dict type to a JSON string.
         for record in records:
             for key, value in record.items():
-                if isinstance(value, dict):
+                if isinstance(value, (dict, list)):
                     record[key] = json.dumps(value)
 
         return super().bulk_insert_records(full_table_name, schema, records)
