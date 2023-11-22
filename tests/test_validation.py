@@ -37,22 +37,46 @@ list_schema = {
     "type": "object",
     "properties": {
         "name": {"type": ["string", "null"]},
-        "age": {"type": "string"},
-        "address": {
-            "type": "array",
+        "variations": {
+            "type": [
+              "null",
+              "array",
+            ],
             "items": {
-                "type": "object",
-                "properties": {
-                    "street": {"type": ["string", "null"]},
-                    "city": {"type": "string"},
-                    "state": {"type": "string"},
-                    "zip": {"type": "string"},
+              "type": [
+                "null",
+                "object",
+              ],
+              "properties": {
+                "price": {
+                  "type": [
+                    "null",
+                    "string",
+                  ],
                 },
-                "required": ["street", "city", "state", "zip"],
+                "size": {
+                  "type": [
+                    "null",
+                    "string",
+                  ],
+                },
+                "qty": {
+                  "type": [
+                    "null",
+                    "integer",
+                  ],
+                },
+                "is_number": {
+                  "type": [
+                    "null",
+                    "boolean",
+                  ],
+                },
+              },
             },
         },
     },
-    "required": ["name", "age", "address"],
+    "required": ["name", "variations"],
 }
 
 # Validator instances
@@ -133,12 +157,9 @@ def test_list_of_dicts_conversion():
     # Test record with list of dicts
     record = {
         "name": "John",
-        "age": 30,
-        "address": [
-            {"street": "Main", "city": {"name": "New York"},
-             "state": "NY", "zip": 10001},
-            {"street": "Main", "city": {"name": "New York"},
-             "state": "NY", "zip": 10002},
+        "variations": [
+            {"price": 1.99, "size": "M", "qty": 10, "is_number": True},
+            {"price": 2.99, "size": 12, "qty": 20, "is_number": False},
         ],
     }
     pre_validated_record = pre_validate_for_string_type(record, list_schema)
@@ -146,8 +167,11 @@ def test_list_of_dicts_conversion():
 
     # Asserting the conversions
     assert (
-        isinstance(pre_validated_record["address"][0]["zip"], str)
-    ), "The 'zip' should have been converted to a string."
+        isinstance(pre_validated_record["variations"][0]["price"], str)
+    ), "The 'price' should have been converted to a string."
     assert (
-        isinstance(pre_validated_record["address"][1]["zip"], str)
-    ), "The 'zip' should have been converted to a string."
+        isinstance(pre_validated_record["variations"][1]["price"], str)
+    ), "The 'price' should have been converted to a string."
+    assert (
+        isinstance(pre_validated_record["variations"][1]["size"], str)
+    ), "The 'size' should have been converted to a string."
