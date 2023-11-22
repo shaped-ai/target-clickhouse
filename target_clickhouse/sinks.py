@@ -192,7 +192,8 @@ def pre_validate_for_string_type(
 
     for key, value in record.items():
         # Checking if the schema expects a string for this key.
-        expected_type = schema.get("properties", {}).get(key, {}).get("type")
+        key_properties = schema.get("properties", {}).get(key, {})
+        expected_type = key_properties.get("type")
         if expected_type is None:
             continue
         if not isinstance(expected_type, list):
@@ -204,6 +205,15 @@ def pre_validate_for_string_type(
                 schema.get("properties", {}).get(key),
                 logger,
             )
+        elif "array" in expected_type and isinstance(value, list):
+            items_schema = key_properties.get("items")
+            for item in value:
+                if items_schema["type"] == "object" and isinstance(item, dict):
+                    pre_validate_for_string_type(
+                        item,
+                        key_properties.get("items"),
+                        logger,
+                    )
         elif "string" in expected_type and not isinstance(value, str):
             # Convert the value to string if it's not already a string.
             record[key] = (
