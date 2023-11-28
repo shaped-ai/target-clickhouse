@@ -199,6 +199,9 @@ def pre_validate_for_string_type(
         if not isinstance(expected_type, list):
             expected_type = [expected_type]
 
+        if "null" in expected_type and value is None:
+            continue
+
         if "object" in expected_type and isinstance(value, dict):
             pre_validate_for_string_type(
                 value,

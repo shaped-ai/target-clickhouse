@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shaped-target-clickhouse"
-version = "0.1.20"
+version = "0.1.21"
 description = "`target-clickhouse` is a Singer target for clickhouse, built with the Meltano Singer SDK."
 readme = "README.md"
 authors = ["Ben Theunissen"]
@@ -49,6 +49,7 @@ ignore = [
     "TCH003",
     "ANN202",
     "C901",
+    "TRY201", # Use of bare 'except'
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]
