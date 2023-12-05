@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import typing
 from typing import TYPE_CHECKING
 
@@ -159,6 +160,35 @@ class ClickhouseConnector(SQLConnector):
             schema_name: The target schema name.
         """
         return
+
+    def prepare_column(
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> None:
+        """Adapt target table to provided schema if possible.
+
+        Args:
+            full_table_name: the target table name.
+            column_name: the target column name.
+            sql_type: the SQLAlchemy type.
+        """
+        if not self.column_exists(full_table_name, column_name):
+            self._create_empty_column(
+                full_table_name=full_table_name,
+                column_name=column_name,
+                sql_type=sql_type,
+            )
+            return
+
+        with contextlib.suppress(NotImplementedError):
+            self._adapt_column_type(
+                full_table_name,
+                column_name=column_name,
+                sql_type=sql_type,
+            )
+
 
     @staticmethod
     def get_column_add_ddl(
