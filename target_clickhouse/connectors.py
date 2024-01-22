@@ -40,11 +40,40 @@ class ClickhouseConnector(SQLConnector):
         Args:
             config: The configuration for the connector.
         """
-        return super().get_sqlalchemy_url(config)
+        if config.get("sqlalchemy_url"):
+            return super().get_sqlalchemy_url(config)
+        else:
+            if config['driver'] == 'http':
+                if config['secure']:
+                    secure_options = f"protocol=https&verify={config['verify']}"
+
+                    if not config['verify']:
+                        # disable urllib3 warning
+                        import urllib3
+                        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+                else:
+                    secure_options = "protocol=http"
+            else:
+                secure_options = f"secure={config['secure']}&verify={config['verify']}"
+            return (
+                f"clickhouse+{config['driver']}://{config['username']}:{config['password']}@"
+                f"{config['host']}:{config['port']}/"
+                f"{config['database']}?{secure_options}"
+            )
 
     def create_engine(self) -> Engine:
         """Create a SQLAlchemy engine for clickhouse."""
         return create_engine(self.get_sqlalchemy_url(self.config))
+
+    @contextlib.contextmanager
+    def _connect(self) -> typing.Iterator[sqlalchemy.engine.Connection]:
+        # hack to overcome error in sqlalchemy-clickhouse driver
+        if self.config.get("driver") == "native":
+            kwargs = {"stream_results": True, "max_row_buffer": 1000}
+        else:
+            kwargs = {"stream_results": True}
+        with self._engine.connect().execution_options(**kwargs) as conn:
+            yield conn
 
     def to_sql_type(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
