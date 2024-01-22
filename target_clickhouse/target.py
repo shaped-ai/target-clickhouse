@@ -20,7 +20,8 @@ class TargetClickhouse(SQLTarget):
             "sqlalchemy_url",
             th.StringType,
             secret=True,  # Flag config as protected.
-            description="The SQLAlchemy connection string for the ClickHouse database",
+            description="The SQLAlchemy connection string for the ClickHouse database. Used if set, "
+                        "otherwise separate settings are used",
         ),
         th.Property(
             "driver",
