@@ -98,11 +98,10 @@ class TargetClickhouse(SQLTarget):
             "table_path",
             th.StringType,
             required=False,
-            description="The table path for replicated tables. This is required when "
-                        "using any of the replication engines. Check out the "
-                        "[documentation](https://clickhouse.com/docs/en/engines/table-engines/"
-                        "mergetree-family/replication#replicatedmergetree-parameters) "
-                        "for more information",
+            description="The table path for replicated tables. This is required when using "
+                        "any of the replication engines. Check out the "
+                        "[documentation](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication#replicatedmergetree-parameters) "
+                        "for more information. Use `$table_name` to substitute the table name."
         ),
         th.Property(
             "replica_name",

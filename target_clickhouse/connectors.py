@@ -171,7 +171,10 @@ class ClickhouseConnector(SQLConnector):
             )
 
         table_engine = create_engine_wrapper(
-            engine_type=engine_type, primary_keys=primary_keys, config=self.config,
+            engine_type=engine_type,
+            primary_keys=primary_keys,
+            table_name=table_name,
+            config=self.config,
         )
 
         table_args = {}
