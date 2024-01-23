@@ -67,13 +67,13 @@ def create_engine_wrapper(
             if table_path is not None:
                 engine_args["table_path"] = table_path
             else:
-                msg = f"Table path (table_path) is not defined."
+                msg = "Table path (table_path) is not defined."
                 raise ValueError(msg)
             replica_name: Optional[str] = config.get("replica_name")
             if replica_name is not None:
                 engine_args["replica_name"] = replica_name
             else:
-                msg = f"Replica name (replica_name) is not defined."
+                msg = "Replica name (replica_name) is not defined."
                 raise ValueError(msg)
 
         engine_class = get_engine_class(engine_type)

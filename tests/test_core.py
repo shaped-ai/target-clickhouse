@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import typing as t
 
-import pytest
 from singer_sdk.testing import get_target_test_class
 
 from target_clickhouse.target import TargetClickhouse
@@ -54,14 +53,3 @@ SpreadTargetTests = get_target_test_class(
 
 class TestSpreadTargetClickhouse(SpreadTargetTests):  # type: ignore[misc, valid-type]
     """Standard Target Tests."""
-
-
-# TODO: native driver seems to be broken
-# NativeTargetTests = get_target_test_class(
-#     target_class=TargetClickhouse,
-#     config=TEST_CONFIG_NATIVE,
-# )
-#
-#
-# class TestNativeTargetClickhouse(NativeTargetTests):  # type: ignore[misc, valid-type]
-#     """Standard Target Tests."""
