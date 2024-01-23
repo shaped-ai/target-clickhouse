@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import List, Optional
 from string import Template
+from typing import List, Optional
 
 from clickhouse_sqlalchemy import engines
 from sqlalchemy import func
