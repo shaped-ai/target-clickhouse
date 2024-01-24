@@ -86,7 +86,15 @@ class ClickhouseSink(SQLSink):
                 if isinstance(value, (dict, list)):
                     record[key] = json.dumps(value)
 
-        return super().bulk_insert_records(full_table_name, schema, records)
+        res = super().bulk_insert_records(full_table_name, schema, records)
+
+        if self.config.get("optimize_after", False):
+            with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
+                self.logger.info("Optimizing table: %s", self.full_table_name)
+                conn.execute(sqlalchemy.text(
+                    f"OPTIMIZE TABLE {self.full_table_name}"))
+
+        return res
 
     def activate_version(self, new_version: int) -> None:
         """Bump the active version of the target table.

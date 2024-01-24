@@ -21,6 +21,7 @@ TEST_CONFIG_SPREAD: dict[str, t.Any] = {
     "database": "default",
     "secure": False,
     "verify": False,
+    "optimize_after": True,
 }
 
 TEST_CONFIG_NATIVE: dict[str, t.Any] = {

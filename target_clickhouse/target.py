@@ -130,6 +130,14 @@ class TargetClickhouse(SQLTarget):
             description="The default target database schema name to use for "
                         "all streams.",
         ),
+        th.Property(
+            "optimize_after",
+            th.BooleanType,
+            required=False,
+            default=False,
+            description="Run 'OPTIMIZE TABLE' after data insert. Useful when"
+                        "table engine removes duplicate rows.",
+        ),
     ).to_dict()
 
     default_sink_class = ClickhouseSink
