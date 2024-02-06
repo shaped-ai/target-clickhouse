@@ -1,4 +1,5 @@
 from enum import Enum
+from string import Template
 from typing import List, Optional
 
 from clickhouse_sqlalchemy import engines
@@ -41,6 +42,7 @@ def get_engine_class(engine_type):
 def create_engine_wrapper(
     engine_type,
     primary_keys: List[str],
+    table_name: str,
     config: Optional[dict] = None,
 ):
     # check if engine type is in supported engines
@@ -65,10 +67,18 @@ def create_engine_wrapper(
         ):
             table_path: Optional[str] = config.get("table_path")
             if table_path is not None:
+                if "$" in table_path:
+                    table_path = Template(table_path).substitute(table_name=table_name)
                 engine_args["table_path"] = table_path
+            else:
+                msg = "Table path (table_path) is not defined."
+                raise ValueError(msg)
             replica_name: Optional[str] = config.get("replica_name")
             if replica_name is not None:
                 engine_args["replica_name"] = replica_name
+            else:
+                msg = "Replica name (replica_name) is not defined."
+                raise ValueError(msg)
 
         engine_class = get_engine_class(engine_type)
 
