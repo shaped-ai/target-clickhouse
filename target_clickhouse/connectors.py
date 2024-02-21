@@ -35,6 +35,46 @@ class ClickhouseConnector(SQLConnector):
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
+
+    def to_sql_type_array(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+        """Convert JSON Schema type to a SQL type.
+
+        Args:
+            jsonschema_type: The JSON Schema object.
+
+        Returns:
+            The SQL type.
+        """
+        import typing as t
+        if th._jsonschema_type_check(jsonschema_type, ("string",)):
+            datelike_type = th.get_datelike_property_type(jsonschema_type)
+            if datelike_type:
+                if datelike_type == "date-time":
+                    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME())
+                if datelike_type in "time":
+                    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME())
+                if datelike_type == "date":
+                    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE())
+
+            maxlength = jsonschema_type.get("maxLength")
+            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR(maxlength))
+
+        if th._jsonschema_type_check(jsonschema_type, ("integer",)):
+            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER())
+        if th._jsonschema_type_check(jsonschema_type, ("number",)):
+            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL())
+        if th._jsonschema_type_check(jsonschema_type, ("boolean",)):
+            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN())
+
+        if th._jsonschema_type_check(jsonschema_type, ("object",)):
+            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        import clickhouse_sqlalchemy.types as ch_types
+        if th._jsonschema_type_check(jsonschema_type, ("array",)):
+            return t.cast(sqlalchemy.types.TypeEngine,
+                          ch_types.Array(self.to_sql_type_array(jsonschema_type["items"])))
+
+        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Generates a SQLAlchemy URL for clickhouse.
 
@@ -88,7 +128,7 @@ class ClickhouseConnector(SQLConnector):
         Returns:
             The SQLAlchemy type representation of the data type.
         """
-        sql_type = th.to_sql_type(jsonschema_type)
+        sql_type = self.to_sql_type_array(jsonschema_type)
 
         # Clickhouse does not support the DECIMAL type without providing precision,
         # so we need to use the FLOAT type.

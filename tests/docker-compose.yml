@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  clickhouse-server:
+    image: "clickhouse/clickhouse-server:22.5.1.2079"
+    container_name: test-clickhouse-server
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD:
+      CLICKHOUSE_DB: default
+    volumes:
+      - type: bind
+        source: ./integration-db
+        target: /docker-entrypoint-initdb.d
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:8123:8123"
+

@@ -85,6 +85,8 @@ class ClickhouseSink(SQLSink):
             for key, value in record.items():
                 if isinstance(value, (dict, list)):
                     record[key] = json.dumps(value)
+                if isinstance(value, list):
+                    record[key] = str(value)
 
         res = super().bulk_insert_records(full_table_name, schema, records)
 

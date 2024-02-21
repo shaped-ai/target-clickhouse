@@ -9,13 +9,13 @@ from singer_sdk.testing import get_target_test_class
 from target_clickhouse.target import TargetClickhouse
 
 TEST_CONFIG: dict[str, t.Any] = {
-    "sqlalchemy_url": "clickhouse+http://default:@localhost:18123",
+    "sqlalchemy_url": "clickhouse+http://default:@localhost:8123",
 }
 
 TEST_CONFIG_SPREAD: dict[str, t.Any] = {
     "driver": "http",
     "host": "localhost",
-    "port": 18123,
+    "port": 8123,
     "username": "default",
     "password": "",
     "database": "default",
@@ -27,7 +27,7 @@ TEST_CONFIG_SPREAD: dict[str, t.Any] = {
 TEST_CONFIG_NATIVE: dict[str, t.Any] = {
     "driver": "native",
     "host": "localhost",
-    "port": 19000,
+    "port": 9000,
     "username": "default",
     "password": "",
     "database": "default",
@@ -40,6 +40,7 @@ StandardTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
     config=TEST_CONFIG,
 )
+
 
 
 class TestStandardTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-type]
