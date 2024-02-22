@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import typing
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
@@ -11,10 +11,12 @@ from clickhouse_sqlalchemy import (
 from clickhouse_sqlalchemy import (
     types as clickhouse_sqlalchemy_types,
 )
+
 from pkg_resources import get_distribution, parse_version
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import Column, MetaData, create_engine
+import copy
 
 from target_clickhouse.engine_class import SupportedEngines, create_engine_wrapper
 
@@ -35,7 +37,6 @@ class ClickhouseConnector(SQLConnector):
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
-
     def to_sql_type_array(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Convert JSON Schema type to a SQL type.
 
@@ -46,34 +47,74 @@ class ClickhouseConnector(SQLConnector):
             The SQL type.
         """
         import typing as t
-        if th._jsonschema_type_check(jsonschema_type, ("string",)):
-            datelike_type = th.get_datelike_property_type(jsonschema_type)
+        
+        def nullabilizer(jsonschema_type: dict, type: sqlalchemy.types.TypeEngine):
+            if th._jsonschema_type_check(jsonschema_type, ("null",)):
+                return clickhouse_sqlalchemy_types.Nullable(type)
+            return type
+        
+        jsonschema_type_copy = copy.deepcopy(jsonschema_type)
+        type_matched = ""
+        
+        if "anyOf" in jsonschema_type_copy:
+            #type_matched: Optional[Union]
+            mapper = {'date-time': 1, 'time':2, 'date':3}
+            
+            """ format_candidates = filter(lambda x: "format" in x, jsonschema_type_copy["anyOf"])
+            format_candidates_sorted = map(lambda x: mapper[x['format']], format_candidates) """
+            format_candidates = [filter(lambda x: "format" in x, jsonschema_type_copy["anyOf"])]
+            if len(format_candidates)!=0:
+                candidates = ("date-time", "time", "date")
+                for candidate in candidates:
+                    if type_matched != "":
+                        break
+                    for type_list in jsonschema_type_copy["anyOf"]:
+                        if candidate in type_list["format"]:
+                            type_matched = type_list
+                            break
+                pass
+            else:
+                candidates = ("string", "integer", "number", "boolean", "object", "array")
+                for candidate in candidates:
+                    if type_matched != "":
+                        break
+                    for type_list in jsonschema_type_copy["anyOf"]:
+                        if candidate in type_list["type"]:
+                            type_matched = type_list
+                            break
+
+            jsonschema_type_copy.pop("anyOf")
+            jsonschema_type_copy["type"] = type_matched
+        
+        
+        if th._jsonschema_type_check(jsonschema_type_copy, ("string",)):
+            datelike_type = th.get_datelike_property_type(jsonschema_type_copy)
             if datelike_type:
                 if datelike_type == "date-time":
-                    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME())
+                    return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME()))
                 if datelike_type in "time":
-                    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME())
+                    return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME()))
                 if datelike_type == "date":
-                    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE())
+                    return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE()))
+        
+        if th._jsonschema_type_check(jsonschema_type_copy, ("integer",)):
+            return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER()))
+        if th._jsonschema_type_check(jsonschema_type_copy, ("number",)):
+            return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL()))
+        if th._jsonschema_type_check(jsonschema_type_copy, ("boolean",)):
+            return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN()))
 
-            maxlength = jsonschema_type.get("maxLength")
-            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR(maxlength))
+        if th._jsonschema_type_check(jsonschema_type_copy, ("object",)):
+            return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR()))
+        if th._jsonschema_type_check(jsonschema_type_copy, ("array",)):
+            return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine,
+                          clickhouse_sqlalchemy_types.Array(self.to_sql_type_array(jsonschema_type_copy["items"]))))
 
-        if th._jsonschema_type_check(jsonschema_type, ("integer",)):
-            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER())
-        if th._jsonschema_type_check(jsonschema_type, ("number",)):
-            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL())
-        if th._jsonschema_type_check(jsonschema_type, ("boolean",)):
-            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN())
+        return nullabilizer(jsonschema_type_copy, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR()))
+        
+        
 
-        if th._jsonschema_type_check(jsonschema_type, ("object",)):
-            return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
-        import clickhouse_sqlalchemy.types as ch_types
-        if th._jsonschema_type_check(jsonschema_type, ("array",)):
-            return t.cast(sqlalchemy.types.TypeEngine,
-                          ch_types.Array(self.to_sql_type_array(jsonschema_type["items"])))
 
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
 
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Generates a SQLAlchemy URL for clickhouse.
@@ -139,7 +180,7 @@ class ClickhouseConnector(SQLConnector):
         elif type(sql_type) == sqlalchemy.types.INTEGER:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
-            )
+            ) 
 
         return sql_type
 
