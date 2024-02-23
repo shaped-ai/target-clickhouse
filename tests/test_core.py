@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib.abc import Traversable
 import os
 import typing as t
 from pathlib import Path
@@ -44,7 +45,7 @@ class TargetAllTypesTest(TargetFileTestTemplate):
     name = "all_types"
 
     @property
-    def singer_filepath(self) -> Path:
+    def singer_filepath(self) -> Traversable:
         """Get path to singer JSONL formatted messages file.
 
         Files will be sourced from `./target_test_streams/<test name>.singer`.
@@ -52,7 +53,7 @@ class TargetAllTypesTest(TargetFileTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return os.path.abspath(os.path.join(os.path.join(os.path.join(__file__, os.pardir), "resources"), f"{self.name}.singer"))
+        return Path(os.path.abspath(os.path.join(os.path.join(os.path.join(__file__, os.pardir), "resources"), f"{self.name}.singer")))
 
 custom_test_key_properties = suites.TestSuite(
     kind="target",

@@ -25,6 +25,12 @@ class ClickhouseSink(SQLSink):
 
     # Investigate larger batch sizes without OOM.
     MAX_SIZE_DEFAULT = 10000
+    def conform_name(
+        self,
+        name: str,
+        object_type: str | None = None,  # noqa: ARG002
+    ) -> str:
+        return name
 
     @property
     def max_size(self) -> int:
