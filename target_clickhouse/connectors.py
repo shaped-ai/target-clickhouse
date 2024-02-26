@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import typing
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
@@ -11,10 +11,12 @@ from clickhouse_sqlalchemy import (
 from clickhouse_sqlalchemy import (
     types as clickhouse_sqlalchemy_types,
 )
+
 from pkg_resources import get_distribution, parse_version
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import Column, MetaData, create_engine
+import copy
 
 from target_clickhouse.engine_class import SupportedEngines, create_engine_wrapper
 
@@ -34,6 +36,51 @@ class ClickhouseConnector(SQLConnector):
     allow_column_alter: bool = True  # Whether altering column types is supported.
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
+
+    def to_sql_type_array(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+        """Convert JSON Schema type to a SQL type.
+
+        Args:
+            jsonschema_type: The JSON Schema object.
+
+        Returns:
+            The SQL type.
+        """
+        import typing as t
+        
+        def nullabilizer(jsonschema_type: dict, type: sqlalchemy.types.TypeEngine):
+            if th._jsonschema_type_check(jsonschema_type, ("null",)):
+                return clickhouse_sqlalchemy_types.Nullable(type)
+            return type
+        
+        if th._jsonschema_type_check(jsonschema_type, ("string",)):
+            datelike_type = th.get_datelike_property_type(jsonschema_type)
+            if datelike_type:
+                if datelike_type == "date-time":
+                    return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME()))
+                if datelike_type in "time":
+                    return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME()))
+                if datelike_type == "date":
+                    return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE()))
+        
+        if th._jsonschema_type_check(jsonschema_type, ("integer",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER()))
+        if th._jsonschema_type_check(jsonschema_type, ("number",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL()))
+        if th._jsonschema_type_check(jsonschema_type, ("boolean",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN()))
+
+        if th._jsonschema_type_check(jsonschema_type, ("object",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR()))
+        if th._jsonschema_type_check(jsonschema_type, ("array",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine,
+                          clickhouse_sqlalchemy_types.Array(self.to_sql_type_array(jsonschema_type["items"]))))
+
+        return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR()))
+        
+        
+
+
 
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Generates a SQLAlchemy URL for clickhouse.
@@ -88,7 +135,7 @@ class ClickhouseConnector(SQLConnector):
         Returns:
             The SQLAlchemy type representation of the data type.
         """
-        sql_type = th.to_sql_type(jsonschema_type)
+        sql_type = self.to_sql_type_array(jsonschema_type)
 
         # Clickhouse does not support the DECIMAL type without providing precision,
         # so we need to use the FLOAT type.
@@ -99,7 +146,7 @@ class ClickhouseConnector(SQLConnector):
         elif type(sql_type) == sqlalchemy.types.INTEGER:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
-            )
+            ) 
 
         return sql_type
 

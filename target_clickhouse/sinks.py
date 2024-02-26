@@ -25,6 +25,12 @@ class ClickhouseSink(SQLSink):
 
     # Investigate larger batch sizes without OOM.
     MAX_SIZE_DEFAULT = 10000
+    def conform_name(
+        self,
+        name: str,
+        object_type: str | None = None,  # noqa: ARG002
+    ) -> str:
+        return name
 
     @property
     def max_size(self) -> int:
@@ -85,6 +91,8 @@ class ClickhouseSink(SQLSink):
             for key, value in record.items():
                 if isinstance(value, (dict, list)):
                     record[key] = json.dumps(value)
+                if isinstance(value, list):
+                    record[key] = str(value)
 
         res = super().bulk_insert_records(full_table_name, schema, records)
 
