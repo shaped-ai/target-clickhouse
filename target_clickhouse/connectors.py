@@ -66,7 +66,7 @@ class ClickhouseConnector(SQLConnector):
         if th._jsonschema_type_check(jsonschema_type, ("integer",)):
             return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER()))
         if th._jsonschema_type_check(jsonschema_type, ("number",)):
-            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL()))
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT()))
         if th._jsonschema_type_check(jsonschema_type, ("boolean",)):
             return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN()))
 
