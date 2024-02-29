@@ -112,6 +112,9 @@ class ClickhouseSink(SQLSink):
         """
         # There's nothing to do if the table doesn't exist yet
         # (which it won't the first time the stream is processed)
+        if not self.config.get("add_record_metadata", True):
+            return
+
         if not self.connector.table_exists(self.full_table_name):
             return
 
