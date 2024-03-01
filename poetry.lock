@@ -1921,13 +1921,13 @@ testing = ["flaky (>=3.4.0)", "freezegun (>=0.3.11)", "pathlib2 (>=2.3.3)", "psu
 
 [[package]]
 name = "types-setuptools"
-version = "68.2.0.2"
+version = "69.1.0.20240301"
 description = "Typing stubs for setuptools"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "types-setuptools-68.2.0.2.tar.gz", hash = "sha256:09efc380ad5c7f78e30bca1546f706469568cf26084cfab73ecf83dea1d28446"},
-    {file = "types_setuptools-68.2.0.2-py3-none-any.whl", hash = "sha256:d5b5ff568ea2474eb573dcb783def7dadfd9b1ff638bb653b3c7051ce5aeb6d1"},
+    {file = "types-setuptools-69.1.0.20240301.tar.gz", hash = "sha256:f99cf5a7f5c281c55f16ba860da68cb2cd8f3b3a472f78ec8e744240fc3aa09e"},
+    {file = "types_setuptools-69.1.0.20240301-py3-none-any.whl", hash = "sha256:2033afa8efe3f566ec18997c4b614664b2ed9653160d941745389ad61a50d1f6"},
 ]
 
 [[package]]
@@ -2134,4 +2134,4 @@ s3 = ["fs-s3fs"]
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.8.0"
-content-hash = "c12bd24a7d001e8171839d6e96bc6c8ab17fbba78bda5ec8dc208c4ca56cb370"
+content-hash = "430bde6f0548d6ab43736348f59df4cd49c5d1f4fef81f18fce38b412cdb2fce"
