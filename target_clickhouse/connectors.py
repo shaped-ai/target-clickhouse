@@ -66,7 +66,12 @@ class ClickhouseConnector(SQLConnector):
         if th._jsonschema_type_check(jsonschema_type, ("integer",)):
             return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER()))
         if th._jsonschema_type_check(jsonschema_type, ("number",)):
-            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT()))
+            if "multipleOf" not in jsonschema_type:  # default to float
+                return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT()))
+            default_precision = 10
+            scale = abs(jsonschema_type['multipleOf'].as_tuple().exponent)
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine,
+                                    clickhouse_sqlalchemy_types.Decimal(default_precision if default_precision >= scale else scale, scale)))
         if th._jsonschema_type_check(jsonschema_type, ("boolean",)):
             return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN()))
 
@@ -77,10 +82,6 @@ class ClickhouseConnector(SQLConnector):
                           clickhouse_sqlalchemy_types.Array(self.to_sql_type_array(jsonschema_type["items"]))))
 
         return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR()))
-        
-        
-
-
 
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Generates a SQLAlchemy URL for clickhouse.

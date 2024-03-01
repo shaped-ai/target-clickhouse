@@ -57,7 +57,7 @@ class TargetAllTypesTest(TargetFileTestTemplate):
 
 custom_test_key_properties = suites.TestSuite(
     kind="target",
-    tests=[TargetAllTypesTest]
+    tests=[TargetAllTypesTest],
 )
 # Run standard built-in target tests from the SDK:
 StandardTargetTests = get_target_test_class(
