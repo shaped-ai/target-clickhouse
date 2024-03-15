@@ -1,5 +1,4 @@
 """Test Configuration."""
-from importlib.abc import Traversable
 from pathlib import Path
 
 from singer_sdk.testing.templates import TargetFileTestTemplate
@@ -13,7 +12,7 @@ class TargetClickhouseFileTestTemplate(TargetFileTestTemplate):
     """
 
     @property
-    def singer_filepath(self) -> Traversable:
+    def singer_filepath(self):
         """Get path to singer JSONL formatted messages file.
 
         Files will be sourced from `./target_test_streams/<test name>.singer`.
