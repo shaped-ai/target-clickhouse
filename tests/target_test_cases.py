@@ -21,14 +21,14 @@ class TestDateTypeTargetClickhouse(TargetClickhouseFileTestTemplate):
             statement=text("SELECT * FROM date_type"),
         ).fetchall()
         record_id_1 = 1
-        record_1 = [
+        record_1 = next(iter([
             record for record in result if record[0] == record_id_1
-        ][0]
+        ]))
         assert record_1[1] == datetime.date(2024, 3, 15)
         record_id_2 = 2
-        record_2 = [
+        record_2 = next(iter([
             record for record in result if record[0] == record_id_2
-        ][0]
+        ]))
         assert record_2[1] == datetime.date(2024, 3, 16)
 
 custom_target_test_suite = TestSuite(
