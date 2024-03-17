@@ -10,7 +10,7 @@ from tests.conftest import TargetClickhouseFileTestTemplate
 logger = logging.getLogger(__name__)
 
 class TestDateTypeTargetClickhouse(TargetClickhouseFileTestTemplate):
-    """Test date type can be ingested into Clickhouse."""
+    """Test date type, and null date type can be ingested into Clickhouse."""
 
     name = "date_type"
 
@@ -30,6 +30,11 @@ class TestDateTypeTargetClickhouse(TargetClickhouseFileTestTemplate):
             record for record in result if record[0] == record_id_2
         ]))
         assert record_2[1] == datetime.date(2024, 3, 16)
+        record_id_3 = 3
+        record_3 = next(iter([
+            record for record in result if record[0] == record_id_3
+        ]))
+        assert record_3[1] is None
 
 custom_target_test_suite = TestSuite(
     kind="target",
