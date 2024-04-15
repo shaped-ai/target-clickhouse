@@ -67,13 +67,7 @@ custom_test_key_properties = suites.TestSuite(
 StandardTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
     config=TEST_CONFIG,
-    custom_suites=[custom_target_test_suite],
-)
-
-StandardTargetTests2 = get_target_test_class(
-    target_class=TargetClickhouse,
-    config=TEST_CONFIG,
-    custom_suites=[custom_test_key_properties],
+    custom_suites=[custom_target_test_suite, custom_test_key_properties],
 )
 
 SpreadTargetTests = get_target_test_class(
@@ -87,13 +81,6 @@ class TestStandardTargetClickhouse(
     StandardTargetTests  # type: ignore[misc, valid-type]
 ):
     """Standard Target Tests."""
-
-
-class TestStandardTargetClickhouse2(
-    StandardTargetTests2  # type: ignore[misc, valid-type]
-):
-    """Standard Target Tests."""
-
 
 class TestSpreadTargetClickhouse(SpreadTargetTests):  # type: ignore[misc, valid-type]
     """Standard Target Tests."""
