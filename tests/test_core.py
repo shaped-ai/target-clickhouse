@@ -12,15 +12,16 @@ from singer_sdk.testing.suites import TestSuite
 from singer_sdk.testing.templates import TargetFileTestTemplate
 
 from target_clickhouse.target import TargetClickhouse
+from tests.target_test_cases import custom_target_test_suite
 
 TEST_CONFIG: dict[str, t.Any] = {
-    "sqlalchemy_url": "clickhouse+http://default:@localhost:8123"
+    "sqlalchemy_url": "clickhouse+http://default:@localhost:18123"
 }
 
 TEST_CONFIG_SPREAD: dict[str, t.Any] = {
     "driver": "http",
     "host": "localhost",
-    "port": 8123,
+    "port": 18123,
     "username": "default",
     "password": "",
     "database": "default",
@@ -32,7 +33,7 @@ TEST_CONFIG_SPREAD: dict[str, t.Any] = {
 TEST_CONFIG_NATIVE: dict[str, t.Any] = {
     "driver": "native",
     "host": "localhost",
-    "port": 9000,
+    "port": 19000,
     "username": "default",
     "password": "",
     "database": "default",
@@ -63,19 +64,29 @@ custom_test_key_properties = suites.TestSuite(
 StandardTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
     config=TEST_CONFIG,
+    custom_suites=[custom_target_test_suite],
+)
+
+StandardTargetTests2 = get_target_test_class(
+    target_class=TargetClickhouse,
+    config=TEST_CONFIG,
     custom_suites=[custom_test_key_properties],
 )
 
-
-class TestStandardTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-type]
+class TestStandardTargetClickhouse(
+    StandardTargetTests, # type: ignore[misc, valid-type]
+):
     """Standard Target Tests."""
-
+class TestStandardTargetClickhouse(
+    StandardTargetTests2, # type: ignore[misc, valid-type]
+):
 
 SpreadTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
     config=TEST_CONFIG_SPREAD,
+    custom_suites=[custom_target_test_suite],
 )
+
 
 class TestSpreadTargetClickhouse(SpreadTargetTests):  # type: ignore[misc, valid-type]
     """Standard Target Tests."""
-
