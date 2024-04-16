@@ -12,6 +12,7 @@ from singer_sdk.testing.suites import TestSuite
 from singer_sdk.testing.templates import TargetFileTestTemplate
 
 from target_clickhouse.target import TargetClickhouse
+from tests.target_test_cases import custom_target_test_suite
 
 TEST_CONFIG: dict[str, t.Any] = {
     "sqlalchemy_url": "clickhouse+http://default:@localhost:8123"
@@ -40,6 +41,7 @@ TEST_CONFIG_NATIVE: dict[str, t.Any] = {
     "verify": False,
 }
 
+
 class TargetAllTypesTest(TargetFileTestTemplate):
     """Test Target handles array data."""
     name = "all_types"
@@ -53,7 +55,9 @@ class TargetAllTypesTest(TargetFileTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return Path(os.path.abspath(os.path.join(os.path.join(os.path.join(__file__, os.pardir), "resources"), f"{self.name}.singer")))
+        return Path(os.path.abspath(
+            os.path.join(os.path.join(os.path.join(__file__, os.pardir), "resources"), f"{self.name}.singer")))
+
 
 custom_test_key_properties = suites.TestSuite(
     kind="target",
@@ -63,19 +67,20 @@ custom_test_key_properties = suites.TestSuite(
 StandardTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
     config=TEST_CONFIG,
-    custom_suites=[custom_test_key_properties],
+    custom_suites=[custom_target_test_suite, custom_test_key_properties],
 )
-
-
-class TestStandardTargetClickhouse(StandardTargetTests):  # type: ignore[misc, valid-type]
-    """Standard Target Tests."""
-
 
 SpreadTargetTests = get_target_test_class(
     target_class=TargetClickhouse,
     config=TEST_CONFIG_SPREAD,
+    custom_suites=[custom_target_test_suite],
 )
+
+
+class TestStandardTargetClickhouse(
+    StandardTargetTests  # type: ignore[misc, valid-type]
+):
+    """Standard Target Tests."""
 
 class TestSpreadTargetClickhouse(SpreadTargetTests):  # type: ignore[misc, valid-type]
     """Standard Target Tests."""
-

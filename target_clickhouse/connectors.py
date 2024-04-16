@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import typing
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
@@ -11,12 +11,10 @@ from clickhouse_sqlalchemy import (
 from clickhouse_sqlalchemy import (
     types as clickhouse_sqlalchemy_types,
 )
-
 from pkg_resources import get_distribution, parse_version
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import Column, MetaData, create_engine
-import copy
 
 from target_clickhouse.engine_class import SupportedEngines, create_engine_wrapper
 
@@ -47,12 +45,12 @@ class ClickhouseConnector(SQLConnector):
             The SQL type.
         """
         import typing as t
-        
+
         def nullabilizer(jsonschema_type: dict, type: sqlalchemy.types.TypeEngine):
             if th._jsonschema_type_check(jsonschema_type, ("null",)):
                 return clickhouse_sqlalchemy_types.Nullable(type)
             return type
-        
+
         if th._jsonschema_type_check(jsonschema_type, ("string",)):
             datelike_type = th.get_datelike_property_type(jsonschema_type)
             if datelike_type:
@@ -62,7 +60,7 @@ class ClickhouseConnector(SQLConnector):
                     return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME()))
                 if datelike_type == "date":
                     return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE()))
-        
+
         if th._jsonschema_type_check(jsonschema_type, ("integer",)):
             return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER()))
         if th._jsonschema_type_check(jsonschema_type, ("number",)):
@@ -147,7 +145,7 @@ class ClickhouseConnector(SQLConnector):
         elif type(sql_type) == sqlalchemy.types.INTEGER:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
-            ) 
+            )
 
         return sql_type
 
