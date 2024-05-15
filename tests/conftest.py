@@ -19,6 +19,7 @@ class TargetClickhouseFileTestTemplate(TargetFileTestTemplate):
 
         Returns
             The expected Path to this tests singer file.
+
         """
         current_file_path = Path(__file__).resolve()
         return current_file_path.parent / "target_test_streams" / f"{self.name}.singer"

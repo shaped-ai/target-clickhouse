@@ -39,6 +39,7 @@ class ClickhouseSink(SQLSink):
 
         Returns
             Max number of records to batch before `is_full=True`
+
         """
         return self.MAX_SIZE_DEFAULT
 
@@ -48,6 +49,7 @@ class ClickhouseSink(SQLSink):
 
         Returns
             The fully qualified table name.
+
         """
         # Use the config table name if set.
         _table_name = self.config.get("table_name")
@@ -86,6 +88,7 @@ class ClickhouseSink(SQLSink):
 
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
+
         """
         # Need to convert any records with a dict type to a JSON string.
         for record in records:
@@ -108,6 +111,7 @@ class ClickhouseSink(SQLSink):
 
         Args:
             new_version: The version number to activate.
+
         """
         # There's nothing to do if the table doesn't exist yet
         # (which it won't the first time the stream is processed)
@@ -167,6 +171,7 @@ class ClickhouseSink(SQLSink):
 
         Returns:
             Validated record.
+
         """
         # Pre-validate and correct string type mismatches.
         record = pre_validate_for_string_type(record, self.schema, self.logger)
@@ -201,6 +206,7 @@ class ClickhouseSink(SQLSink):
             record: Individual record in the stream.
             schema: TODO
             treatment: TODO
+
         """
         for key, value in record.items():
             if key not in schema["properties"]:
@@ -253,6 +259,7 @@ def pre_validate_for_string_type(
 
     Returns:
         Record with corrected string type mismatches.
+
     """
     if schema is None:
         if logger:
