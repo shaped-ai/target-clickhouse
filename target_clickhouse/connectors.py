@@ -100,9 +100,13 @@ class ClickhouseConnector(SQLConnector):
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
             )
+        elif type(sql_type) == sqlalchemy.types.DATE:
+            sql_type = typing.cast(
+                sqlalchemy.types.TypeEngine,
+                clickhouse_sqlalchemy_types.Nullable(clickhouse_sqlalchemy_types.Date32),
+            )
         # All date and time types should be flagged as Nullable to allow for NULL value.
         elif type(sql_type) in [
-            sqlalchemy.types.DATE,
             sqlalchemy.types.TIMESTAMP,
             sqlalchemy.types.TIME,
             sqlalchemy.types.DATETIME,
