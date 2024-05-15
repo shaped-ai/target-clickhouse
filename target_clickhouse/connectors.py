@@ -40,6 +40,7 @@ class ClickhouseConnector(SQLConnector):
 
         Args:
             config: The configuration for the connector.
+
         """
         if config.get("sqlalchemy_url"):
             return super().get_sqlalchemy_url(config)
@@ -87,6 +88,7 @@ class ClickhouseConnector(SQLConnector):
 
         Returns:
             The SQLAlchemy type representation of the data type.
+
         """
         sql_type = th.to_sql_type(jsonschema_type)
 
@@ -100,9 +102,13 @@ class ClickhouseConnector(SQLConnector):
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
             )
+        elif type(sql_type) == sqlalchemy.types.DATE:
+            sql_type = typing.cast(
+                sqlalchemy.types.TypeEngine,
+                clickhouse_sqlalchemy_types.Nullable(clickhouse_sqlalchemy_types.Date32),
+            )
         # All date and time types should be flagged as Nullable to allow for NULL value.
         elif type(sql_type) in [
-            sqlalchemy.types.DATE,
             sqlalchemy.types.TIMESTAMP,
             sqlalchemy.types.TIME,
             sqlalchemy.types.DATETIME,
@@ -131,6 +137,7 @@ class ClickhouseConnector(SQLConnector):
         Raises:
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
+
         """
         if as_temp_table:
             msg = "Temporary tables are not supported."
@@ -199,6 +206,7 @@ class ClickhouseConnector(SQLConnector):
 
         Args:
             schema_name: The target schema name.
+
         """
         return
 
@@ -214,6 +222,7 @@ class ClickhouseConnector(SQLConnector):
             full_table_name: the target table name.
             column_name: the target column name.
             sql_type: the SQLAlchemy type.
+
         """
         if not self.column_exists(full_table_name, column_name):
             self._create_empty_column(
@@ -247,6 +256,7 @@ class ClickhouseConnector(SQLConnector):
 
         Returns:
             A sqlalchemy DDL instance.
+
         """
         create_column_clause = sqlalchemy.schema.CreateColumn(
             sqlalchemy.Column(
@@ -282,6 +292,7 @@ class ClickhouseConnector(SQLConnector):
 
         Returns:
             A sqlalchemy DDL instance.
+
         """
         if self.config.get("cluster_name"):
             return sqlalchemy.DDL(

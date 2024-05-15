@@ -17,24 +17,25 @@ class TestDateTypeTargetClickhouse(TargetClickhouseFileTestTemplate):
     def validate(self) -> None:
         """Validate the data in the target."""
         connector = self.target.default_sink_class.connector_class(self.target.config)
+        records = {
+            1: datetime.date(2024, 3, 15),
+            2: datetime.date(2024, 3, 16),
+            3: datetime.date(1920, 3, 16),
+            4: None,
+        }
+
         result = connector.connection.execute(
             statement=text("SELECT * FROM date_type"),
         ).fetchall()
-        record_id_1 = 1
-        record_1 = next(iter([
-            record for record in result if record[0] == record_id_1
-        ]))
-        assert record_1[1] == datetime.date(2024, 3, 15)
-        record_id_2 = 2
-        record_2 = next(iter([
-            record for record in result if record[0] == record_id_2
-        ]))
-        assert record_2[1] == datetime.date(2024, 3, 16)
-        record_id_3 = 3
-        record_3 = next(iter([
-            record for record in result if record[0] == record_id_3
-        ]))
-        assert record_3[1] is None
+
+        for record_id, expected_date in records.items():
+            record = next((rec for rec in result if rec[0] == record_id), None)
+            assert record is not None, f"Record with id {record_id} not found"
+            assert (
+                record[1] == (
+                    expected_date if expected_date is None else str(expected_date)
+                )
+            ), f"For record {record_id}, expected {expected_date}, got {record[1]}"
 
 custom_target_test_suite = TestSuite(
     kind="target",
