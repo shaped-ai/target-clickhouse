@@ -86,6 +86,7 @@ class ClickhouseConnector(SQLConnector):
 
         Args:
             config: The configuration for the connector.
+
         """
         if config.get("sqlalchemy_url"):
             return super().get_sqlalchemy_url(config)
@@ -133,6 +134,7 @@ class ClickhouseConnector(SQLConnector):
 
         Returns:
             The SQLAlchemy type representation of the data type.
+
         """
         sql_type = self.to_sql_type_array(jsonschema_type)
 
@@ -151,6 +153,7 @@ class ClickhouseConnector(SQLConnector):
                 sqlalchemy.types.TypeEngine,
                 clickhouse_sqlalchemy_types.Nullable(clickhouse_sqlalchemy_types.Date32),
             )
+
         return sql_type
 
     def create_empty_table(
@@ -173,6 +176,7 @@ class ClickhouseConnector(SQLConnector):
         Raises:
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
+
         """
         if as_temp_table:
             msg = "Temporary tables are not supported."
@@ -241,6 +245,7 @@ class ClickhouseConnector(SQLConnector):
 
         Args:
             schema_name: The target schema name.
+
         """
         return
 
@@ -256,6 +261,7 @@ class ClickhouseConnector(SQLConnector):
             full_table_name: the target table name.
             column_name: the target column name.
             sql_type: the SQLAlchemy type.
+
         """
         if not self.column_exists(full_table_name, column_name):
             self._create_empty_column(
@@ -289,6 +295,7 @@ class ClickhouseConnector(SQLConnector):
 
         Returns:
             A sqlalchemy DDL instance.
+
         """
         create_column_clause = sqlalchemy.schema.CreateColumn(
             sqlalchemy.Column(
@@ -324,6 +331,7 @@ class ClickhouseConnector(SQLConnector):
 
         Returns:
             A sqlalchemy DDL instance.
+
         """
         if self.config.get("cluster_name"):
             return sqlalchemy.DDL(

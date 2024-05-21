@@ -1,4 +1,5 @@
 {"type": "SCHEMA", "stream": "date_type", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "date": {"format": "date", "type": [ "null", "string" ] }}}}
 {"type": "RECORD", "stream": "date_type", "record": {"id": 1, "date": "2024-03-15"}}
 {"type": "RECORD", "stream": "date_type", "record": {"id": 2, "date": "2024-03-16T00:00:00+00:00"}}
-{"type": "RECORD", "stream": "date_type", "record": {"id": 3, "date": null}}
+{"type": "RECORD", "stream": "date_type", "record": {"id": 3, "date": "1920-03-16"}}
+{"type": "RECORD", "stream": "date_type", "record": {"id": 4, "date": null}}
