@@ -146,7 +146,11 @@ class ClickhouseConnector(SQLConnector):
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
             )
-
+        elif type(sql_type) == sqlalchemy.types.DATE:
+            sql_type = typing.cast(
+                sqlalchemy.types.TypeEngine,
+                clickhouse_sqlalchemy_types.Nullable(clickhouse_sqlalchemy_types.Date32),
+            )
         return sql_type
 
     def create_empty_table(
