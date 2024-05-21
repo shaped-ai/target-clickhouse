@@ -35,6 +35,52 @@ class ClickhouseConnector(SQLConnector):
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
+    def to_sql_type_array(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+        """Convert JSON Schema type to a SQL type.
+
+        Args:
+            jsonschema_type: The JSON Schema object.
+
+        Returns:
+            The SQL type.
+        """
+        import typing as t
+
+        def nullabilizer(jsonschema_type: dict, type: sqlalchemy.types.TypeEngine):
+            if th._jsonschema_type_check(jsonschema_type, ("null",)):
+                return clickhouse_sqlalchemy_types.Nullable(type)
+            return type
+
+        if th._jsonschema_type_check(jsonschema_type, ("string",)):
+            datelike_type = th.get_datelike_property_type(jsonschema_type)
+            if datelike_type:
+                if datelike_type == "date-time":
+                    return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME()))
+                if datelike_type in "time":
+                    return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME()))
+                if datelike_type == "date":
+                    return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE()))
+
+        if th._jsonschema_type_check(jsonschema_type, ("integer",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER()))
+        if th._jsonschema_type_check(jsonschema_type, ("number",)):
+            if "multipleOf" not in jsonschema_type:  # default to float
+                return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT()))
+            default_precision = 10
+            scale = abs(jsonschema_type['multipleOf'].as_tuple().exponent)
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine,
+                                    clickhouse_sqlalchemy_types.Decimal(default_precision if default_precision >= scale else scale, scale)))
+        if th._jsonschema_type_check(jsonschema_type, ("boolean",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN()))
+
+        if th._jsonschema_type_check(jsonschema_type, ("object",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR()))
+        if th._jsonschema_type_check(jsonschema_type, ("array",)):
+            return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine,
+                          clickhouse_sqlalchemy_types.Array(self.to_sql_type_array(jsonschema_type["items"]))))
+
+        return nullabilizer(jsonschema_type, t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR()))
+
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Generates a SQLAlchemy URL for clickhouse.
 
@@ -90,7 +136,7 @@ class ClickhouseConnector(SQLConnector):
             The SQLAlchemy type representation of the data type.
 
         """
-        sql_type = th.to_sql_type(jsonschema_type)
+        sql_type = self.to_sql_type_array(jsonschema_type)
 
         # Clickhouse does not support the DECIMAL type without providing precision,
         # so we need to use the FLOAT type.
@@ -107,13 +153,6 @@ class ClickhouseConnector(SQLConnector):
                 sqlalchemy.types.TypeEngine,
                 clickhouse_sqlalchemy_types.Nullable(clickhouse_sqlalchemy_types.Date32),
             )
-        # All date and time types should be flagged as Nullable to allow for NULL value.
-        elif type(sql_type) in [
-            sqlalchemy.types.TIMESTAMP,
-            sqlalchemy.types.TIME,
-            sqlalchemy.types.DATETIME,
-        ]:
-            sql_type = clickhouse_sqlalchemy_types.Nullable(sql_type)
 
         return sql_type
 
