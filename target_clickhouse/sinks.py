@@ -176,20 +176,7 @@ class ClickhouseSink(SQLSink):
         # Pre-validate and correct string type mismatches.
         record = pre_validate_for_string_type(record, self.schema, self.logger)
 
-        try:
-            if self.validate_schema:
-                self._validator.validate(record)
-            self._parse_timestamps_in_record(
-                record=record,
-                schema=self.schema,
-                treatment=self.datetime_error_treatment,
-            )
-        except jsonschema_exceptions.ValidationError as e:
-            if self.logger:
-                self.logger.exception(f"Record failed validation: {record}")
-            raise e # : RERAISES
-
-        return record
+        return super()._validate_and_parse(record)
 
     def _parse_timestamps_in_record(
         self,
