@@ -91,6 +91,8 @@ class ClickhouseConnector(SQLConnector):
 
         """
         sql_type = th.to_sql_type(jsonschema_type)
+        minLength = jsonschema_type['minLength']
+        maxLength = jsonschema_type['maxLength']
 
         # Clickhouse does not support the DECIMAL type without providing precision,
         # so we need to use the FLOAT type.
@@ -99,9 +101,14 @@ class ClickhouseConnector(SQLConnector):
                 sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT(),
             )
         elif type(sql_type) == sqlalchemy.types.INTEGER:
-            sql_type = typing.cast(
-                sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
-            )
+            if minLength == 0:
+                sql_type = typing.cast(
+                    sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.UInt64(),
+                )
+            else:
+                sql_type = typing.cast(
+                    sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
+                )
         elif type(sql_type) == sqlalchemy.types.DATE:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine,
