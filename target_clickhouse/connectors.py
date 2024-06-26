@@ -100,7 +100,7 @@ class ClickhouseConnector(SQLConnector):
             )
         elif type(sql_type) == sqlalchemy.types.INTEGER:
             minimum = jsonschema_type.get("minimum")
-            if minimum and minimum == 0:
+            if minimum is not None and minimum == 0:
                 sql_type = typing.cast(
                     sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.UInt64(),
                 )
