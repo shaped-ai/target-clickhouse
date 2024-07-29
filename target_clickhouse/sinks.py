@@ -30,19 +30,6 @@ class ClickhouseSink(SQLSink):
 
     connector_class = ClickhouseConnector
 
-    # Investigate larger batch sizes without OOM.
-    MAX_SIZE_DEFAULT = 10000
-
-    @property
-    def max_size(self) -> int:
-        """Get max batch size.
-
-        Returns
-            Max number of records to batch before `is_full=True`
-
-        """
-        return self.MAX_SIZE_DEFAULT
-
     @property
     def full_table_name(self) -> str:
         """Return the fully qualified table name.
