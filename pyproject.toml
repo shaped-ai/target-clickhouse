@@ -15,6 +15,7 @@ fs-s3fs = { version = "^1.1.1", optional = true }
 clickhouse-sqlalchemy = { git = "https://github.com/xzkostyan/clickhouse-sqlalchemy.git", rev = "7ad94b0" }
 
 simplejson = "^3.19.3"
+pendulum = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.3.2"
