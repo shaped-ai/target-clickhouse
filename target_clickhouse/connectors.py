@@ -190,6 +190,7 @@ class ClickhouseConnector(SQLConnector):
             primary_keys=primary_keys,
             table_name=table_name,
             config=self.config,
+            order_by_keys=self.config.get("order_by_keys"),
         )
 
         table_args = {}
