@@ -99,9 +99,15 @@ class ClickhouseConnector(SQLConnector):
                 sqlalchemy.types.TypeEngine, sqlalchemy.types.FLOAT(),
             )
         elif type(sql_type) == sqlalchemy.types.INTEGER:
-            sql_type = typing.cast(
-                sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
-            )
+            minimum = jsonschema_type.get("minimum")
+            if minimum is not None and minimum == 0:
+                sql_type = typing.cast(
+                    sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.UInt64(),
+                )
+            else:
+                sql_type = typing.cast(
+                    sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
+                )
         elif type(sql_type) == sqlalchemy.types.DATE:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine,
