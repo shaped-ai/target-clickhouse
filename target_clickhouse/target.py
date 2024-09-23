@@ -138,6 +138,13 @@ class TargetClickhouse(SQLTarget):
             description="Run 'OPTIMIZE TABLE' after data insert. Useful when"
                         "table engine removes duplicate rows.",
         ),
+        th.Property(
+            "order_by_keys",
+            th.ArrayType(th.StringType),
+            required=False,
+            description="List of columns to order by. Used for engines that require "
+                        "ordering.",
+        ),
     ).to_dict()
 
     default_sink_class = ClickhouseSink
