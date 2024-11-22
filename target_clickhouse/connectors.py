@@ -77,7 +77,7 @@ class ClickhouseConnector(SQLConnector):
         with self._engine.connect().execution_options(**kwargs) as conn:
             yield conn
 
-    def to_sql_type(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+    def to_sql_type(self, jsonschema_type: dict, is_primary_key: bool) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
         Developers may override this method to accept additional input argument types,
@@ -85,6 +85,7 @@ class ClickhouseConnector(SQLConnector):
 
         Args:
             jsonschema_type: The JSON Schema representation of the source type.
+            is_primary_key: Identifies if the field is part of the primary key.
 
         Returns:
             The SQLAlchemy type representation of the data type.
@@ -102,17 +103,18 @@ class ClickhouseConnector(SQLConnector):
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine, clickhouse_sqlalchemy_types.Int64(),
             )
-        elif type(sql_type) == sqlalchemy.types.DATE:
+        # All date and time types should be flagged as Nullable to allow for NULL
+        # value, unless they're part of the table's primary key.
+        elif type(sql_type) == sqlalchemy.types.DATE and not is_primary_key:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine,
                 clickhouse_sqlalchemy_types.Nullable(clickhouse_sqlalchemy_types.Date32),
             )
-        # All date and time types should be flagged as Nullable to allow for NULL value.
         elif type(sql_type) in [
             sqlalchemy.types.TIMESTAMP,
             sqlalchemy.types.TIME,
             sqlalchemy.types.DATETIME,
-        ]:
+        ] and not is_primary_key:
             sql_type = clickhouse_sqlalchemy_types.Nullable(sql_type)
 
         return sql_type
@@ -180,7 +182,7 @@ class ClickhouseConnector(SQLConnector):
             columns.append(
                 Column(
                     property_name,
-                    self.to_sql_type(property_jsonschema),
+                    self.to_sql_type(property_jsonschema, is_primary_key),
                     primary_key=is_primary_key,
                 ),
             )
