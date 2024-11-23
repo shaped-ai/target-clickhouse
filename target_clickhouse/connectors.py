@@ -52,6 +52,7 @@ class ClickhouseConnector(SQLConnector):
                 if not config["verify"]:
                     # disable urllib3 warning
                     import urllib3
+
                     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
             else:
                 secure_options = "protocol=http"
@@ -108,7 +109,8 @@ class ClickhouseConnector(SQLConnector):
         return sql_type
 
     def to_sql_type_non_primary_key(
-            self, jsonschema_type: dict,
+        self,
+        jsonschema_type: dict,
     ) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
@@ -142,12 +144,12 @@ class ClickhouseConnector(SQLConnector):
         return sql_type
 
     def create_empty_table(
-            self,
-            full_table_name: str,
-            schema: dict,
-            primary_keys: list[str] | None = None,
-            partition_keys: list[str] | None = None,
-            as_temp_table: bool = False,  # noqa: FBT001, FBT002
+        self,
+        full_table_name: str,
+        schema: dict,
+        primary_keys: list[str] | None = None,
+        partition_keys: list[str] | None = None,
+        as_temp_table: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Create an empty target table, using Clickhouse Engine.
 
@@ -240,10 +242,10 @@ class ClickhouseConnector(SQLConnector):
         return
 
     def prepare_column(
-            self,
-            full_table_name: str,
-            column_name: str,
-            sql_type: sqlalchemy.types.TypeEngine,
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -270,9 +272,9 @@ class ClickhouseConnector(SQLConnector):
 
     @staticmethod
     def get_column_add_ddl(
-            table_name: str,
-            column_name: str,
-            column_type: sqlalchemy.types.TypeEngine,
+        table_name: str,
+        column_name: str,
+        column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
         """Get the create column DDL statement.
 
@@ -305,10 +307,10 @@ class ClickhouseConnector(SQLConnector):
         )
 
     def get_column_alter_ddl(
-            self,
-            table_name: str,
-            column_name: str,
-            column_type: sqlalchemy.types.TypeEngine,
+        self,
+        table_name: str,
+        column_name: str,
+        column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
         """Get the alter column DDL statement.
 
