@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import typing
 from typing import TYPE_CHECKING
+from urllib.parse import quote
 
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
@@ -58,7 +59,7 @@ class ClickhouseConnector(SQLConnector):
         else:
             secure_options = f"secure={config['secure']}&verify={config['verify']}"
         return (
-            f"clickhouse+{config['driver']}://{config['username']}:{config['password']}@"
+            f"clickhouse+{config['driver']}://{quote(config['username'])}:{quote(config['password'])}@"
             f"{config['host']}:{config['port']}/"
             f"{config['database']}?{secure_options}"
         )
