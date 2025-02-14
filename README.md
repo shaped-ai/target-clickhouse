@@ -1,162 +1,232 @@
 # target-clickhouse
 
-`target-clickhouse` is a Singer target for clickhouse.
+`target-clickhouse` is a Singer target for ClickHouse, built with the [Meltano Target SDK](https://sdk.meltano.com).
 
-Build with the [Meltano Target SDK](https://sdk.meltano.com).
+## Features
 
-<!--
-
-Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
+- Supports various ClickHouse table engines including MergeTree family
+- Handles data replication and distributed tables
+- Supports schema changes and data type conversions
+- Provides flexible configuration for connection and table settings
 
 ## Installation
-
-Install from PyPi:
-
-```bash
-pipx install target-clickhouse
-```
 
 Install from GitHub:
 
 ```bash
-pipx install git+https://github.com/ORG_NAME/target-clickhouse.git@main
+pipx install git+https://github.com/dlouseiro/target-clickhouse.git@main
 ```
 
--->
+## Development
+
+### Setup
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/dlouseiro/target-clickhouse.git
+cd target-clickhouse
+```
+
+2. Install dependencies using Poetry:
+
+```bash
+poetry install --all-extras
+```
 
 ## Configuration
 
-### Accepted Config Options
+### Connection Settings
 
-<!--
-Developer TODO: Provide a list of config options accepted by the target.
+| Setting        | Required | Default   | Description                                                                 |
+| :------------- | :------- | :-------- | :-------------------------------------------------------------------------- |
+| sqlalchemy_url | False    | None      | SQLAlchemy connection string. If set, other connection settings are ignored |
+| driver         | False    | http      | Driver type: `http`, `native`, or `asynch`                                  |
+| username       | False    | default   | Database user                                                               |
+| password       | False    | None      | User password                                                               |
+| host           | False    | localhost | Database host                                                               |
+| port           | False    | 8123      | Database port (8123 for HTTP, 9000 for native)                              |
+| database       | False    | default   | Database name                                                               |
+| secure         | False    | false     | Enable secure connection                                                    |
+| verify         | False    | true      | Verify SSL/TLS certificates                                                 |
 
-This section can be created by copy-pasting the CLI output from:
+### Table Settings
 
-```
-target-clickhouse --about --format=markdown
-```
--->
+| Setting               | Required | Default | Description                                                 |
+| :-------------------- | :------- | :------ | :---------------------------------------------------------- |
+| engine_type           | False    | None    | Table engine type (e.g., MergeTree, ReplacingMergeTree)     |
+| table_name            | False    | None    | Target table name (defaults to stream name)                 |
+| table_path            | False    | None    | Table path for replicated tables (required for replication) |
+| replica_name          | False    | None    | Replica name for replicated tables                          |
+| cluster_name          | False    | None    | Cluster name for distributed tables                         |
+| default_target_schema | False    | None    | Default target schema/database for all streams              |
+| optimize_after        | False    | false   | Run OPTIMIZE TABLE after insert (useful for deduplication)  |
+| order_by_keys         | False    | None    | Columns to order by (required for MergeTree engines)        |
 
-| Setting              | Required | Default | Description                                                                                                                                                                                                                                                                                                             |
-|:---------------------|:--------:|:-------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| sqlalchemy_url       | False    | None    | The SQLAlchemy connection string for the ClickHouse database. Used if set, otherwise separate settings are used                                                                                                                                                                                                         |
-| driver               | False    | http    | Driver type                                                                                                                                                                                                                                                                                                             |
-| username             | False    | default | Database user                                                                                                                                                                                                                                                                                                           |
-| password             | False    | None    | Username password                                                                                                                                                                                                                                                                                                       |
-| host                 | False    | localhost | Database host                                                                                                                                                                                                                                                                                                           |
-| port                 | False    |    8123 | Database connection port                                                                                                                                                                                                                                                                                                |
-| database             | False    | default | Database name                                                                                                                                                                                                                                                                                                           |
-| secure               | False    |       0 | Should the connection be secure                                                                                                                                                                                                                                                                                         |
-| verify               | False    |       1 | Should secure connection need to verify SSL/TLS                                                                                                                                                                                                                                                                         |
-| engine_type          | False    | None    | The engine type to use for the table.                                                                                                                                                                                                                                                                                   |
-| table_name           | False    | None    | The name of the table to write to. Defaults to stream name.                                                                                                                                                                                                                                                             |
-| table_path           | False    | None    | The table path for replicated tables. This is required when using any of the replication engines. Check out the [documentation](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication#replicatedmergetree-parameters) for more information. Use `$table_name` to substitute the table name. |
-| replica_name         | False    | None    | The `replica_name` for replicated tables. This is required when using any of the replication engines.                                                                                                                                                                                                                   |
-| cluster_name         | False    | None    | The cluster to create tables in. This is passed as the `clickhouse_cluster` argument when creating a table. [Documentation](https://clickhouse.com/docs/en/sql-reference/distributed-ddl) can be found here.                                                                                                            |
-| default_target_schema| False    | None    | The default target database schema name to use for all streams.                                                                                                                                                                                                                                                         |
-| optimize_after       | False    |       0 | Run 'OPTIMIZE TABLE' after data insert                                                                                                                                                                                                                                                                                  |
-| optimize_after       | False    |       0 | Run 'OPTIMIZE TABLE' after data insert. Useful whentable engine removes duplicate rows.                                                                                                                                                                                                                                 |
-| load_method          | False    | TargetLoadMethods.APPEND_ONLY | The method to use when loading data into the destination. `append-only` will always write all input records whether that records already exists or not. `upsert` will update existing records and insert new records. `overwrite` will delete all existing records and insert all input records.                        |
-| order_by_keys        | False    | None    | The list of columns to order by when loading data into the destination.                                                                                                                                                                                                                                                 |
-| stream_maps          | False    | None    | Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html).                                                                                                                                                                             |
-| stream_map_config    | False    | None    | User-defined config values to be used within map expressions.                                                                                                                                                                                                                                                           |
-| flattening_enabled   | False    | None    | 'True' to enable schema flattening and automatically expand nested properties.                                                                                                                                                                                                                                          |
-| flattening_max_depth | False    | None    | The max depth to flatten schemas.                                                                                                                                                                                                                                                                                       |
+### Data Loading Settings
 
-A full list of supported settings and capabilities is available by running: `target-clickhouse --about`
+| Setting            | Required | Default     | Description                                                  |
+| :----------------- | :------- | :---------- | :----------------------------------------------------------- |
+| load_method        | False    | append-only | Data loading method: `append-only`, `upsert`, or `overwrite` |
+| stream_maps        | False    | None        | Stream maps configuration for data transformation            |
+| stream_map_config  | False    | None        | User-defined values for stream map expressions               |
+| flattening_enabled | False    | None        | Enable automatic flattening of nested properties             |
 
-### Configure using environment variables
+### Environment Variables
 
-This Singer target will automatically import any environment variables within the working directory's
-`.env` if the `--config=ENV` is provided, such that config values will be considered if a matching
-environment variable is set either in the terminal context or in the `.env` file.
-
-### Source Authentication and Authorization
-
-<!--
-Developer TODO: If your target requires special access on the destination system, or any special authentication requirements, provide those here.
--->
-
-## Usage
-
-You can easily run `target-clickhouse` by itself or in a pipeline using [Meltano](https://meltano.com/).
-
-### Executing the Target Directly
+All configuration settings can be provided using environment variables with the prefix `TAP_CLICKHOUSE_`. For example:
 
 ```bash
-target-clickhouse --version
-target-clickhouse --help
-# Test using the "Carbon Intensity" sample:
-tap-carbon-intensity | target-clickhouse --config /path/to/target-clickhouse-config.json
+export TAP_CLICKHOUSE_HOST=localhost
+export TAP_CLICKHOUSE_PORT=8123
+export TAP_CLICKHOUSE_DATABASE=my_database
 ```
 
-## Developer Resources
-
-Follow these instructions to contribute to this project.
-
-### Initialize your Development Environment
+For secure credentials, it's recommended to use environment variables instead of storing them in configuration files:
 
 ```bash
-pipx install poetry
-poetry install
+export TAP_CLICKHOUSE_USERNAME=my_user
+export TAP_CLICKHOUSE_PASSWORD=my_password
 ```
 
-### Start the Clickhouse container
+## Usage Examples
 
-In order to run the tests locally, you must have a Docker daemon running on your host machine.
+### Basic Configuration
 
-You can start the Clickhouse container by running:
+Here's a basic example using HTTP connection:
+
+```yaml
+plugins:
+  loaders:
+    - name: target-clickhouse
+      config:
+        host: localhost
+        port: 8123
+        database: my_database
 ```
-./docker_run_clickhouse.sh
+
+Or using SQLAlchemy URL:
+
+```yaml
+plugins:
+  loaders:
+    - name: target-clickhouse
+      config:
+        sqlalchemy_url: "clickhouse+http://default:@localhost:8123/my_database"
 ```
 
-### Create and Run Tests
+### Using MergeTree Engine
 
-Create tests within the `tests` subfolder and
-  then run:
+Example configuration using the MergeTree engine with ordering:
+
+```yaml
+plugins:
+  loaders:
+    - name: target-clickhouse
+      config:
+        engine_type: "MergeTree"
+        order_by_keys: ["id", "created_at"]
+```
+
+### Replicated Tables
+
+Example configuration for replicated tables:
+
+```yaml
+plugins:
+  loaders:
+    - name: target-clickhouse
+      config:
+        engine_type: "ReplicatedMergeTree"
+        table_path: "/clickhouse/tables/{shard}/my_database/$table_name"
+        replica_name: "replica1"
+        order_by_keys: ["id"]
+```
+
+### Data Loading Methods
+
+Example of using different loading methods:
+
+```yaml
+plugins:
+  loaders:
+    - name: target-clickhouse
+      config:
+        # For append-only (default)
+        load_method: "append-only"
+
+        # For upsert (requires primary key)
+        load_method: "upsert"
+        engine_type: "ReplacingMergeTree"
+        order_by_keys: ["id"]
+        optimize_after: true
+
+        # For overwrite
+        load_method: "overwrite"
+```
+
+## Supported Table Engines
+
+- `MergeTree`
+- `ReplacingMergeTree`
+- `SummingMergeTree`
+- `AggregatingMergeTree`
+- `ReplicatedMergeTree`
+- `ReplicatedReplacingMergeTree`
+- `ReplicatedSummingMergeTree`
+- `ReplicatedAggregatingMergeTree`
+
+For more information about ClickHouse table engines, refer to the [official documentation](https://clickhouse.com/docs/en/engines/table-engines).
+
+### Testing
+
+The test suite includes tests for core functionality and validation. The test environment is automatically set up and torn down as needed.
 
 ```bash
+# Run all tests
 poetry run pytest
 ```
 
-You can also test the `target-clickhouse` CLI interface directly using `poetry run`:
+### Code Quality
+
+This project uses pre-commit hooks to ensure code quality:
+
+- YAML linting
+- Code formatting with Prettier
+- Python linting with Ruff
+- Type checking with MyPy
 
 ```bash
-poetry run target-clickhouse --help
+# Install pre-commit hooks
+poetry run pre-commit install
+
+# Run checks manually
+poetry run pre-commit run --all-files
 ```
 
-### Testing with [Meltano](https://meltano.com/)
+## Contributing
 
-_**Note:** This target will work in any Singer environment and does not require Meltano.
-Examples here are for convenience and to streamline end-to-end orchestration scenarios._
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and commit them: `git commit -m 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
+5. Submit a pull request
 
-<!--
-Developer TODO:
-Your project comes with a custom `meltano.yml` project file already created. Open the `meltano.yml` and follow any "TODO" items listed in
-the file.
--->
+Make sure to:
 
-Next, install Meltano (if you haven't already) and any needed plugins:
+- Add tests for any new features
+- Update documentation as needed
+- Follow the existing code style
+- Run pre-commit hooks before committing
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Additional Information
+
+For a complete list of settings and capabilities:
 
 ```bash
-# Install meltano
-pipx install meltano
-# Initialize meltano within this directory
-cd target-clickhouse
-meltano install
+target-clickhouse --about --format=markdown
 ```
-
-Now you can test and orchestrate using Meltano:
-
-```bash
-# Test invocation:
-meltano invoke target-clickhouse --version
-# OR run a test `elt` pipeline with the Carbon Intensity sample tap:
-meltano elt tap-carbon-intensity target-clickhouse
-```
-
-### SDK Dev Guide
-
-See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the Meltano Singer SDK to
-develop your own Singer taps and targets.

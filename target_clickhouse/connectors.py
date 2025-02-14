@@ -23,7 +23,8 @@ if TYPE_CHECKING:
 
 
 class ClickhouseConnector(SQLConnector):
-    """Clickhouse Meltano Connector.
+    """
+    Clickhouse Meltano Connector.
 
     Inherits from `SQLConnector` class, overriding methods where needed
     for Clickhouse compatibility.
@@ -36,7 +37,8 @@ class ClickhouseConnector(SQLConnector):
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
     def get_sqlalchemy_url(self, config: dict) -> str:
-        """Generates a SQLAlchemy URL for clickhouse.
+        """
+        Generates a SQLAlchemy URL for clickhouse.
 
         Args:
             config: The configuration for the connector.
@@ -79,7 +81,8 @@ class ClickhouseConnector(SQLConnector):
             yield conn
 
     def to_sql_type(self, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
-        """Return a JSON Schema representation of the provided type.
+        """
+        Return a JSON Schema representation of the provided type.
 
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
@@ -112,7 +115,8 @@ class ClickhouseConnector(SQLConnector):
         self,
         jsonschema_type: dict,
     ) -> sqlalchemy.types.TypeEngine:
-        """Return a JSON Schema representation of the provided type.
+        """
+        Return a JSON Schema representation of the provided type.
 
         To be used when the field is not in the primary key of the table.
 
@@ -151,7 +155,8 @@ class ClickhouseConnector(SQLConnector):
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
-        """Create an empty target table, using Clickhouse Engine.
+        """
+        Create an empty target table, using Clickhouse Engine.
 
         Args:
             full_table_name: the target table name.
@@ -231,7 +236,8 @@ class ClickhouseConnector(SQLConnector):
         meta.create_all(self._engine)
 
     def prepare_schema(self, _: str) -> None:
-        """Create the target database schema.
+        """
+        Create the target database schema.
 
         In Clickhouse, a schema is a database, so this method is a no-op.
 
@@ -247,7 +253,8 @@ class ClickhouseConnector(SQLConnector):
         column_name: str,
         sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
-        """Adapt target table to provided schema if possible.
+        """
+        Adapt target table to provided schema if possible.
 
         Args:
             full_table_name: the target table name.
@@ -276,7 +283,8 @@ class ClickhouseConnector(SQLConnector):
         column_name: str,
         column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
-        """Get the create column DDL statement.
+        """
+        Get the create column DDL statement.
 
         Override this if your database uses a different syntax for creating columns.
 
@@ -312,7 +320,8 @@ class ClickhouseConnector(SQLConnector):
         column_name: str,
         column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
-        """Get the alter column DDL statement.
+        """
+        Get the alter column DDL statement.
 
         Overrides the static method in the base class to support ON CLUSTER.
 

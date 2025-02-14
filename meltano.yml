@@ -3,41 +3,104 @@ send_anonymous_usage_stats: true
 project_id: "target-clickhouse"
 default_environment: test
 environments:
-- name: test
+  - name: test
 plugins:
   extractors:
-  - name: "tap-smoke-test"
-    namespace: "tap_smoke_test"
-    executable: "tap-smoke-test"
-    pip_url: "git+https://github.com/meltano/tap-smoke-test.git"
-    config:
-      streams:
-      - stream_name: animals
-        "input_filename": "https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/animals-data.jsonl"
-      - stream_name: page_views
-        "input_filename": "https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/pageviews-data.jsonl"
-      stream_maps:
-        "animals":
-          "__key_properties__": ["id"]
-        "page_views":
-          "__key_properties__": ["vistor_id"]
+    - name: "tap-smoke-test"
+      namespace: "tap_smoke_test"
+      executable: "tap-smoke-test"
+      pip_url: "git+https://github.com/meltano/tap-smoke-test.git"
+      config:
+        streams:
+          - stream_name: animals
+            "input_filename": "https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/animals-data.jsonl"
+          - stream_name: page_views
+            "input_filename": "https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/pageviews-data.jsonl"
+        stream_maps:
+          "animals":
+            "__key_properties__": ["id"]
+          "page_views":
+            "__key_properties__": ["vistor_id"]
   loaders:
-  - name: "target-clickhouse"
-    namespace: "target_clickhouse"
-    pip_url: -e .
-    capabilities:
-    - about
-    - stream-maps
-    - record-flattening
-    config:
-      sqlalchemy_url: 'clickhouse+http://default:@localhost:18123'
-    settings:
-    - name: sqlalchemy_url
-      kind: string
-      required: true
-      secret: true
-      description: "The SQLAlchemy connection string for the ClickHouse database."
-    - name: table_name
-      kind: string
-      required: false
-      description: "The name of the table to load data into. Defaults to the stream name."
+    - name: "target-clickhouse"
+      namespace: "target_clickhouse"
+      pip_url: -e .
+      capabilities:
+        - about
+        - stream-maps
+        - record-flattening
+      config:
+        sqlalchemy_url: "clickhouse+http://default:@localhost:18123/"
+      settings:
+        # Connection settings
+        - name: sqlalchemy_url
+          kind: string
+          sensitive: true
+          description: "The SQLAlchemy connection string for the ClickHouse database."
+          documentation: "https://clickhouse.com/docs/en/integrations/sql-clients/sqlalchemy"
+        - name: driver
+          kind: string
+          value: "http"
+          description: "Driver type"
+          tooltip: "The type of driver to use for connecting to ClickHouse. Options: http, native, asynch"
+        - name: username
+          kind: string
+          value: "default"
+          description: "Database user"
+        - name: password
+          kind: string
+          sensitive: true
+          description: "Username password"
+        - name: host
+          kind: string
+          value: "localhost"
+          description: "Database host"
+        - name: port
+          kind: integer
+          value: 8123
+          description: "Database connection port"
+        - name: database
+          kind: string
+          value: "default"
+          description: "Database name"
+        - name: secure
+          kind: boolean
+          value: false
+          description: "Should the connection be secure"
+        - name: verify
+          kind: boolean
+          value: true
+          description: "Should secure connection need to verify SSL/TLS"
+        # Table settings
+        - name: table_name
+          kind: string
+          description: "The name of the table to write to. Defaults to stream name."
+        - name: engine_type
+          kind: string
+          description: "The engine type to use for the table."
+          documentation: "https://clickhouse.com/docs/en/engines/table-engines"
+        - name: table_path
+          kind: string
+          description: "The table path for replicated tables. Required when using replication engines."
+          documentation: "https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication"
+        - name: replica_name
+          kind: string
+          description: "The replica_name for replicated tables. Required when using replication engines."
+        - name: cluster_name
+          kind: string
+          description: "The cluster to create tables in. Used for the clickhouse_cluster argument."
+          documentation: "https://clickhouse.com/docs/en/sql-reference/distributed-ddl"
+        - name: default_target_schema
+          kind: string
+          description: "The default target database schema name to use for all streams."
+        - name: optimize_after
+          kind: boolean
+          value: false
+          description: "Run 'OPTIMIZE TABLE' after data insert. Useful when table engine removes duplicate rows."
+          documentation: "https://clickhouse.com/docs/en/sql-reference/statements/optimize"
+        - name: order_by_keys
+          kind: array
+          description: "List of columns to order by. Used for engines that require ordering."
+          documentation: >
+            https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/
+            mergetree#mergetree-query-clauses

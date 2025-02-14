@@ -21,7 +21,7 @@ class TargetClickhouse(SQLTarget):
             th.StringType,
             secret=True,  # Flag config as protected.
             description="The SQLAlchemy connection string for the ClickHouse database. "
-                        "Used if set, otherwise separate settings are used",
+            "Used if set, otherwise separate settings are used",
         ),
         th.Property(
             "driver",
@@ -79,7 +79,6 @@ class TargetClickhouse(SQLTarget):
             description="Should secure connection need to verify SSL/TLS",
             default=True,
         ),
-
         # other settings
         th.Property(
             "engine_type",
@@ -99,36 +98,36 @@ class TargetClickhouse(SQLTarget):
             th.StringType,
             required=False,
             description="The table path for replicated tables. This is required when "
-                        "using any of the replication engines. Check out the "
-                        "[documentation](https://clickhouse.com/docs/en/engines/table-engines/"
-                        "mergetree-family/replication#replicatedmergetree-parameters) "
-                        "for more information. Use `$table_name` to substitute the "
-                        "table name.",
+            "using any of the replication engines. Check out the "
+            "[documentation](https://clickhouse.com/docs/en/engines/table-engines/"
+            "mergetree-family/replication#replicatedmergetree-parameters) "
+            "for more information. Use `$table_name` to substitute the "
+            "table name.",
         ),
         th.Property(
             "replica_name",
             th.StringType,
             required=False,
             description="The `replica_name` for replicated tables. This is required "
-                        "when using any of the replication engines.",
+            "when using any of the replication engines.",
         ),
         th.Property(
             "cluster_name",
             th.StringType,
             required=False,
             description="The cluster to create tables in. This is passed as the "
-                        "`clickhouse_cluster` argument when creating a table. "
-                        "[Documentation]"
-                        "(https://clickhouse.com/docs/en/"
-                        "sql-reference/distributed-ddl) "
-                        "can be found here.",
+            "`clickhouse_cluster` argument when creating a table. "
+            "[Documentation]"
+            "(https://clickhouse.com/docs/en/"
+            "sql-reference/distributed-ddl) "
+            "can be found here.",
         ),
         th.Property(
             "default_target_schema",
             th.StringType,
             required=False,
             description="The default target database schema name to use for "
-                        "all streams.",
+            "all streams.",
         ),
         th.Property(
             "optimize_after",
@@ -136,14 +135,14 @@ class TargetClickhouse(SQLTarget):
             required=False,
             default=False,
             description="Run 'OPTIMIZE TABLE' after data insert. Useful when"
-                        "table engine removes duplicate rows.",
+            "table engine removes duplicate rows.",
         ),
         th.Property(
             "order_by_keys",
             th.ArrayType(th.StringType),
             required=False,
             description="List of columns to order by. Used for engines that require "
-                        "ordering.",
+            "ordering.",
         ),
     ).to_dict()
 

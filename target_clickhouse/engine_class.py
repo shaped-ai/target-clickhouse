@@ -1,6 +1,5 @@
 from enum import Enum
 from string import Template
-from typing import List, Optional
 
 from clickhouse_sqlalchemy import engines
 from sqlalchemy import func
@@ -23,11 +22,15 @@ ENGINE_MAPPING = {
     SupportedEngines.SUMMING_MERGE_TREE: engines.SummingMergeTree,
     SupportedEngines.AGGREGATING_MERGE_TREE: engines.AggregatingMergeTree,
     SupportedEngines.REPLICATED_MERGE_TREE: engines.ReplicatedMergeTree,
-    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE:
-        engines.ReplicatedReplacingMergeTree,
-    SupportedEngines.REPLICATED_SUMMING_MERGE_TREE: engines.ReplicatedSummingMergeTree,
-    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE:
-        engines.ReplicatedAggregatingMergeTree,
+    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE: (
+        engines.ReplicatedReplacingMergeTree
+    ),
+    SupportedEngines.REPLICATED_SUMMING_MERGE_TREE: (
+        engines.ReplicatedSummingMergeTree
+    ),
+    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE: (
+        engines.ReplicatedAggregatingMergeTree
+    ),
 }
 
 
@@ -41,10 +44,10 @@ def get_engine_class(engine_type):
 
 def create_engine_wrapper(
     engine_type,
-    primary_keys: List[str],
+    primary_keys: list[str],
     table_name: str,
-    config: Optional[dict] = None,
-    order_by_keys: Optional[List[str]] = None,
+    config: dict | None = None,
+    order_by_keys: list[str] | None = None,
 ):
     # check if engine type is in supported engines
     if is_supported_engine(engine_type) is False:
@@ -69,7 +72,7 @@ def create_engine_wrapper(
             SupportedEngines.REPLICATED_SUMMING_MERGE_TREE,
             SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE,
         ):
-            table_path: Optional[str] = config.get("table_path")
+            table_path: str | None = config.get("table_path")
             if table_path is not None:
                 if "$" in table_path:
                     table_path = Template(table_path).substitute(table_name=table_name)
@@ -77,7 +80,7 @@ def create_engine_wrapper(
             else:
                 msg = "Table path (table_path) is not defined."
                 raise ValueError(msg)
-            replica_name: Optional[str] = config.get("replica_name")
+            replica_name: str | None = config.get("replica_name")
             if replica_name is not None:
                 engine_args["replica_name"] = replica_name
             else:
