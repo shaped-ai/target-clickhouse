@@ -1,0 +1,23 @@
+{
+  "categories": [
+    {
+      "title": "## 🚀 Features",
+      "labels": ["feature"]
+    },
+    {
+      "title": "## 🐛 Bug Fixes",
+      "labels": ["fix"]
+    },
+    {
+      "title": "## 📝 Documentation",
+      "labels": ["documentation"]
+    },
+    {
+      "title": "## ⬆️ Dependencies",
+      "labels": ["dependencies"]
+    }
+  ],
+  "template": "${{CHANGELOG}}\n\n## 📦 Commits\n\n${{COMMITS}}",
+  "pr_template": "- ${{TITLE}} (#${{NUMBER}})",
+  "empty_template": "- No changes"
+}

@@ -1,0 +1,27 @@
+- name: feature
+  color: "0e8a16"
+  description: "New feature or enhancement"
+
+- name: fix
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: bug
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: documentation
+  color: "0075ca"
+  description: "Documentation improvements"
+
+- name: dependencies
+  color: "ffa500"
+  description: "Dependency updates"
+
+- name: breaking
+  color: "b60205"
+  description: "Breaking changes"
+
+- name: skip-changelog
+  color: "cccccc"
+  description: "Skip from changelog generation"

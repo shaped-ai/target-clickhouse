@@ -1,9 +1,10 @@
 [tool.poetry]
-name = "shaped-target-clickhouse"
-version = "0.2.5"
-description = "`target-clickhouse` is a Singer target for clickhouse, built with the Meltano Singer SDK."
+name = "target-clickhouse-dlouseiro"
+version = "0.0.0"
+description = "`target-clickhouse` is a Singer target for ClickHouse, built with the Meltano Singer SDK. Fork of shaped-ai/target-clickhouse."
 readme = "README.md"
-authors = ["Ben Theunissen"]
+
+authors = ["Ben Theunissen", "Dinis Louseiro"]
 keywords = [
     "ELT",
     "clickhouse",

@@ -1,6 +1,16 @@
 # target-clickhouse
 
-`target-clickhouse` is a Singer target for ClickHouse, built with the [Meltano Target SDK](https://sdk.meltano.com).
+`target-clickhouse` is a Singer target for ClickHouse, built with the [Meltano Target SDK](https://sdk.meltano.com). This project is a fork of [shaped-ai/target-clickhouse](https://github.com/shaped-ai/target-clickhouse) with additional features and active maintenance.
+
+## Fork Information
+
+This fork was created to provide:
+
+- Active maintenance and updates
+- Additional features and improvements
+- Regular releases and bug fixes
+
+While we maintain compatibility where possible, some behaviors may differ from the original project. Please refer to the release notes for details on changes and improvements.
 
 ## Features
 
@@ -15,6 +25,12 @@ Install from GitHub:
 
 ```bash
 pipx install git+https://github.com/dlouseiro/target-clickhouse.git@main
+```
+
+Or install a specific version:
+
+```bash
+pipx install git+https://github.com/dlouseiro/target-clickhouse.git@v0.2.5
 ```
 
 ## Development
