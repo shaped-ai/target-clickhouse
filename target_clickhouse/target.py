@@ -144,6 +144,17 @@ class TargetClickhouse(SQLTarget):
             description="List of columns to order by. Used for engines that require "
             "ordering.",
         ),
+        th.Property(
+            "materialize_primary_keys",
+            th.BooleanType,
+            required=False,
+            default=True,
+            description=(
+                "Whether to materialize primary keys in the database. If false, "
+                "primary keys will only be used for ordering when no order_by_keys "
+                "are specified."
+            ),
+        ),
     ).to_dict()
 
     default_sink_class = ClickhouseSink

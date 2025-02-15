@@ -55,15 +55,25 @@ def create_engine_wrapper(
         raise ValueError(msg)
 
     engine_args: dict = {}
-    if len(primary_keys) > 0:
-        engine_args["primary_key"] = primary_keys
+    materialize_primary_keys = (
+        config.get("materialize_primary_keys", True) if config else True
+    )
+
+    # Handle order by keys based on configuration
+    if order_by_keys is not None:
+        # If order_by_keys are specified, use them for ordering
+        engine_args["order_by"] = order_by_keys
+    elif len(primary_keys) > 0:
+        # If no order_by_keys but we have primary_keys, use primary_keys for ordering
+        engine_args["order_by"] = primary_keys
     else:
-        # If no primary keys are specified,
-        # then Clickhouse expects the data to be indexed on all fields via tuple().
+        # If no primary keys or order by keys specified,
+        # then Clickhouse expects the data to be indexed on all fields via tuple()
         engine_args["order_by"] = func.tuple()
 
-    if order_by_keys is not None:
-        engine_args["order_by"] = order_by_keys
+    # Only set primary_key if materialize_primary_keys is True and we have primary keys
+    if materialize_primary_keys and len(primary_keys) > 0:
+        engine_args["primary_key"] = primary_keys
 
     if config is not None:
         if engine_type in (

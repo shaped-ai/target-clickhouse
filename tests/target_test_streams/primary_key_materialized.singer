@@ -1,0 +1,3 @@
+{"type": "SCHEMA", "stream": "primary_key_materialized", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "value": {"type": "string"}}}}
+{"type": "RECORD", "stream": "primary_key_materialized", "record": {"id": 1, "value": "first"}}
+{"type": "RECORD", "stream": "primary_key_materialized", "record": {"id": 2, "value": "second"}}

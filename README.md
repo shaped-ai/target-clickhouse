@@ -50,6 +50,18 @@ cd target-clickhouse
 poetry install --all-extras
 ```
 
+### Testing
+
+The test suite includes tests for core functionality and validation. Before running tests, start the ClickHouse container:
+
+```bash
+# Start ClickHouse container
+./docker_run_clickhouse.sh
+
+# Run all tests
+poetry run pytest
+```
+
 ## Configuration
 
 ### Connection Settings
@@ -68,16 +80,17 @@ poetry install --all-extras
 
 ### Table Settings
 
-| Setting               | Required | Default | Description                                                 |
-| :-------------------- | :------- | :------ | :---------------------------------------------------------- |
-| engine_type           | False    | None    | Table engine type (e.g., MergeTree, ReplacingMergeTree)     |
-| table_name            | False    | None    | Target table name (defaults to stream name)                 |
-| table_path            | False    | None    | Table path for replicated tables (required for replication) |
-| replica_name          | False    | None    | Replica name for replicated tables                          |
-| cluster_name          | False    | None    | Cluster name for distributed tables                         |
-| default_target_schema | False    | None    | Default target schema/database for all streams              |
-| optimize_after        | False    | false   | Run OPTIMIZE TABLE after insert (useful for deduplication)  |
-| order_by_keys         | False    | None    | Columns to order by (required for MergeTree engines)        |
+| Setting                  | Required | Default | Description                                                 |
+| :----------------------- | :------- | :------ | :---------------------------------------------------------- |
+| engine_type              | False    | None    | Table engine type (e.g., MergeTree, ReplacingMergeTree)     |
+| table_name               | False    | None    | Target table name (defaults to stream name)                 |
+| table_path               | False    | None    | Table path for replicated tables (required for replication) |
+| replica_name             | False    | None    | Replica name for replicated tables                          |
+| cluster_name             | False    | None    | Cluster name for distributed tables                         |
+| default_target_schema    | False    | None    | Default target schema/database for all streams              |
+| optimize_after           | False    | false   | Run OPTIMIZE TABLE after insert (useful for deduplication)  |
+| order_by_keys            | False    | None    | Columns to order by (required for MergeTree engines)        |
+| materialize_primary_keys | False    | true    | Whether to materialize primary keys in the database         |
 
 ### Data Loading Settings
 
@@ -193,15 +206,6 @@ plugins:
 - `ReplicatedAggregatingMergeTree`
 
 For more information about ClickHouse table engines, refer to the [official documentation](https://clickhouse.com/docs/en/engines/table-engines).
-
-### Testing
-
-The test suite includes tests for core functionality and validation. The test environment is automatically set up and torn down as needed.
-
-```bash
-# Run all tests
-poetry run pytest
-```
 
 ### Code Quality
 

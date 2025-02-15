@@ -104,3 +104,9 @@ plugins:
           documentation: >
             https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/
             mergetree#mergetree-query-clauses
+        - name: materialize_primary_keys
+          kind: boolean
+          value: true
+          description: >
+            Whether to materialize primary keys in the database. If false, primary keys
+            will only be used for ordering when no order_by_keys are specified.
