@@ -68,7 +68,7 @@
       "target": "💥 "
     }
   ],
-  "commit_template": "- #{{MESSAGE}} (#{{HASH}}) by @#{{AUTHOR}}",
+  "commit_template": "- #{{TITLE}} (#{{MERGE_SHA}}) by @#{{AUTHOR}}",
   "empty_template": "- No changes",
   "mode": "COMMIT",
   "label_extractor": [
