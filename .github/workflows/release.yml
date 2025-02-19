@@ -15,12 +15,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get previous tag
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 1.0.0 # Optional fallback tag to use when no tag can be found
+
+      - name: Get current tag
+        id: currenttag
+        uses: "WyriHaximus/github-action-get-current-tag@v1"
+
       - name: Generate changelog
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v4
         with:
           configuration: ".github/changelog-config.json"
-          commitMode: true
+          fromTag: ${{ steps.previoustag.outputs.tag }}
+          toTag: ${{ steps.currenttag.outputs.tag }}
+          commitMode: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
