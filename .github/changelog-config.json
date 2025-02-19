@@ -2,22 +2,118 @@
   "categories": [
     {
       "title": "## 🚀 Features",
-      "labels": ["feature"]
+      "labels": ["feature", "enhancement"]
     },
     {
       "title": "## 🐛 Bug Fixes",
-      "labels": ["fix"]
+      "labels": ["fix", "bug"]
     },
     {
       "title": "## 📝 Documentation",
-      "labels": ["documentation"]
+      "labels": ["documentation", "docs"]
     },
     {
       "title": "## ⬆️ Dependencies",
-      "labels": ["dependencies"]
+      "labels": ["dependencies", "deps"]
+    },
+    {
+      "title": "## 🔧 Maintenance",
+      "labels": ["chore", "maintenance"]
+    },
+    {
+      "title": "## 🧪 Tests",
+      "labels": ["test", "tests"]
     }
   ],
-  "template": "${{CHANGELOG}}\n\n## 📦 Commits\n\n${{COMMITS}}",
-  "pr_template": "- ${{TITLE}} (#${{NUMBER}})",
-  "empty_template": "- No changes"
+  "template": "${{CHANGELOG}}\n\n## 📦 All Changes\n\n${{COMMITS}}",
+  "pr_template": "- ${{TITLE}} (#${{NUMBER}}) by @${{AUTHOR}}",
+  "trim_values": true,
+  "capitalize_title": true,
+  "exclude_merge_branches": ["main", "master"],
+  "custom_placeholders": [
+    {
+      "pattern": "^feat: ",
+      "target": "🚀 "
+    },
+    {
+      "pattern": "^fix: ",
+      "target": "🐛 "
+    },
+    {
+      "pattern": "^docs: ",
+      "target": "📝 "
+    },
+    {
+      "pattern": "^deps: ",
+      "target": "⬆️ "
+    },
+    {
+      "pattern": "^test: ",
+      "target": "🧪 "
+    },
+    {
+      "pattern": "^chore: ",
+      "target": "🔧 "
+    },
+    {
+      "pattern": "^BREAKING CHANGE: ",
+      "target": "💥 "
+    }
+  ],
+  "commit_template": "- ${{TITLE}} (${{HASH}}) by @${{AUTHOR}}",
+  "empty_template": "- No changes",
+  "label_extractor": [
+    {
+      "pattern": "^feat: .+",
+      "target": "feature"
+    },
+    {
+      "pattern": "^fix: .+",
+      "target": "fix"
+    },
+    {
+      "pattern": "^docs: .+",
+      "target": "documentation"
+    },
+    {
+      "pattern": "^chore: .+",
+      "target": "chore"
+    },
+    {
+      "pattern": "^test: .+",
+      "target": "test"
+    },
+    {
+      "pattern": "^deps: .+",
+      "target": "dependencies"
+    }
+  ],
+  "base_branches": ["main", "master"],
+  "sort": "ASC",
+  "transformers": [
+    {
+      "pattern": "^feat: ",
+      "target": "🚀 "
+    },
+    {
+      "pattern": "^fix: ",
+      "target": "🐛 "
+    },
+    {
+      "pattern": "^docs: ",
+      "target": "📝 "
+    },
+    {
+      "pattern": "^chore: ",
+      "target": "🔧 "
+    },
+    {
+      "pattern": "^test: ",
+      "target": "🧪 "
+    },
+    {
+      "pattern": "^deps: ",
+      "target": "⬆️ "
+    }
+  ]
 }
