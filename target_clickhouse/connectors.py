@@ -49,7 +49,9 @@ class ClickhouseConnector(SQLConnector):
 
         if config["driver"] == "http":
             if config["secure"]:
-                secure_options = f"protocol=https&verify={config['verify']}"
+                secure_options = (
+                    f"protocol=https&verify={config['verify']}&alter_sync=2"
+                )
 
                 if not config["verify"]:
                     # disable urllib3 warning
@@ -57,9 +59,11 @@ class ClickhouseConnector(SQLConnector):
 
                     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
             else:
-                secure_options = "protocol=http"
+                secure_options = "protocol=http&alter_sync=2"
         else:
-            secure_options = f"secure={config['secure']}&verify={config['verify']}"
+            secure_options = (
+                f"secure={config['secure']}&verify={config['verify']}&alter_sync=2"
+            )
         return (
             f"clickhouse+{config['driver']}://{config['username']}:{config['password']}@"
             f"{config['host']}:{config['port']}/"
