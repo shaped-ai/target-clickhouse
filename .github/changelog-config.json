@@ -25,8 +25,8 @@
       "labels": ["test", "tests"]
     }
   ],
-  "template": "${{CHANGELOG}}\n\n## 📦 All Changes\n\n${{COMMITS}}",
-  "pr_template": "- ${{TITLE}} (#${{NUMBER}}) by @${{AUTHOR}}",
+  "template": "#{{CHANGELOG}}\n\n## 📦 Commits\n\n#{{COMMITS}}",
+  "pr_template": "- #{{TITLE}} (#{{NUMBER}}) by @#{{AUTHOR}}",
   "trim_values": true,
   "capitalize_title": true,
   "exclude_merge_branches": ["main", "master"],
@@ -60,7 +60,7 @@
       "target": "💥 "
     }
   ],
-  "commit_template": "- ${{TITLE}} (${{HASH}}) by @${{AUTHOR}}",
+  "commit_template": "- #{{MESSAGE}} (#{{HASH}}) by @#{{AUTHOR}}",
   "empty_template": "- No changes",
   "label_extractor": [
     {

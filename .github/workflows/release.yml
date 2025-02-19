@@ -30,7 +30,9 @@ jobs:
           configuration: ".github/changelog-config.json"
           fromTag: ${{ steps.previoustag.outputs.tag }}
           toTag: ${{ steps.currenttag.outputs.tag }}
-          commitMode: false
+          commitMode: true
+          fetchCommits: true
+          fetchReleaseInformation: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
