@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "target-clickhouse-dlouseiro"
-version = "0.5.2"
+version = "0.5.3"
 description = "`target-clickhouse` is a Singer target for ClickHouse, built with the Meltano Singer SDK. Fork of shaped-ai/target-clickhouse."
 readme = "README.md"
 
