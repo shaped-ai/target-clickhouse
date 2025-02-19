@@ -8,24 +8,65 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
-      timezone: "America/New_York"
+      interval: "weekly"
+      timezone: "Europe/Amsterdam"
       time: "09:00"
+      day: "monday"
     reviewers:
-      - "btheunissen"
+      - "dlouseiro"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "⬆️"
+      include: "scope"
+    groups:
+      python-packages:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "pip"
     directory: "/.github/workflows"
     schedule:
-      interval: "daily"
-      timezone: "America/New_York"
+      interval: "weekly"
+      timezone: "Europe/Amsterdam"
       time: "09:00"
+      day: "monday"
     reviewers:
-      - "btheunissen"
+      - "dlouseiro"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "⬆️"
+      include: "scope"
+    groups:
+      workflow-packages:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      timezone: "America/New_York"
+      timezone: "Europe/Amsterdam"
       time: "09:00"
+      day: "monday"
     reviewers:
-      - "btheunissen"
+      - "dlouseiro"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "⬆️"
+      include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

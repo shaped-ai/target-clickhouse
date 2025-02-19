@@ -1,0 +1,108 @@
+{
+  "categories": [
+    {
+      "title": "## 🚀 Features",
+      "labels": ["feat", "feature"]
+    },
+    {
+      "title": "## 🐛 Bug Fixes",
+      "labels": ["fix"]
+    },
+    {
+      "title": "## 📝 Documentation",
+      "labels": ["docs"]
+    },
+    {
+      "title": "## ⬆️ Dependencies",
+      "labels": ["deps"]
+    },
+    {
+      "title": "## 🔧 Maintenance",
+      "labels": ["chore"]
+    },
+    {
+      "title": "## 🧪 Tests",
+      "labels": ["test"]
+    },
+    {
+      "title": "## 💡 Refactor",
+      "labels": ["refactor"]
+    },
+    {
+      "title": "## ⚡ Performance",
+      "labels": ["perf"]
+    }
+  ],
+  "template": "#{{CHANGELOG}}",
+  "pr_template": "- #{{TITLE}} (#{{NUMBER}}) by @#{{AUTHOR}}",
+  "trim_values": true,
+  "capitalize_title": true,
+  "exclude_merge_branches": ["main", "master"],
+  "custom_placeholders": [
+    {
+      "pattern": "^feat: ",
+      "target": "🚀 "
+    },
+    {
+      "pattern": "^fix: ",
+      "target": "🐛 "
+    },
+    {
+      "pattern": "^docs: ",
+      "target": "📝 "
+    },
+    {
+      "pattern": "^deps: ",
+      "target": "⬆️ "
+    },
+    {
+      "pattern": "^test: ",
+      "target": "🧪 "
+    },
+    {
+      "pattern": "^chore: ",
+      "target": "🔧 "
+    },
+    {
+      "pattern": "^BREAKING CHANGE: ",
+      "target": "💥 "
+    }
+  ],
+  "commit_template": "- #{{TITLE}} (#{{MERGE_SHA}}) by @#{{AUTHOR}}",
+  "empty_template": "- No changes",
+  "mode": "COMMIT",
+  "label_extractor": [
+    {
+      "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",
+      "target": "$1"
+    }
+  ],
+  "base_branches": ["main", "master"],
+  "sort": "ASC",
+  "transformers": [
+    {
+      "pattern": "^feat: ",
+      "target": "🚀 "
+    },
+    {
+      "pattern": "^fix: ",
+      "target": "🐛 "
+    },
+    {
+      "pattern": "^docs: ",
+      "target": "📝 "
+    },
+    {
+      "pattern": "^chore: ",
+      "target": "🔧 "
+    },
+    {
+      "pattern": "^test: ",
+      "target": "🧪 "
+    },
+    {
+      "pattern": "^deps: ",
+      "target": "⬆️ "
+    }
+  ]
+}

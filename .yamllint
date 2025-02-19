@@ -1,0 +1,10 @@
+---
+extends: default
+
+rules:
+  document-start: disable
+  line-length:
+    max: 120
+  truthy: disable
+  comments:
+    min-spaces-from-content: 1  # Allow single space before comments

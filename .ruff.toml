@@ -1,0 +1,57 @@
+src = ["target_clickhouse"]
+target-version = "py310"
+
+[lint]
+ignore = [
+    "ANN",     # Type annotation related
+    "TCH",     # Type checking related
+    "UP007",  # Use X | Y for union types
+    "ANN001", # missing-return-type
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+    "ANN201",  # missing-return-type-doc
+    "ANN202",  # missing-return-type-doc
+    "D100",   # Missing docstring in public module
+    "D101",   # Missing docstring in public class
+    "D103",   # Missing docstring in public function
+    "D203",   # one-blank-line-before-class (conflicts with D211)
+    "D212",   # multi-line-summary-first-line (conflicts with D213)
+    "D401",   # First line should be in imperative mood
+    "D407",   # Missing dashed underline after section
+    "FA100",  # Forbidden import
+    "S101",   # Use of assert detected
+    "G004",   # Logging statement uses string formatting
+    "TCH002", # Type checker related
+    "TCH003", # Type checker related
+    "C901",   # Too complex
+    "TRY201", # Use of bare 'except'
+    "COM812", # Conflicts with formatter
+    "ISC001", # Conflicts with formatter
+    "UP007",  # Use X | Y for union types
+    "PGH003", # Use specific rule codes when ignoring type issues
+    "PLC0414", # Import alias does not rename original package
+    "PLR0911", # Too many return statements
+    "PLR0912", # Too many branches
+    "PLR0913", # Too many arguments to function call
+    "PLR0915", # Too many statements
+    "PLW0603", # Using globals
+    "PLW2901", # For loop variable overwritten
+    "RUF012",  # Mutable class attributes
+    "RUF013",  # Too many arguments
+    "RUF100",  # Unused noqa directive
+    "SLF001",  # Private member accessed
+    "TCH001",  # Missing type parameters
+    "TCH002",  # Missing type parameters
+    "TCH003",  # Missing type parameters
+    "TCH004",  # Missing type parameters
+]
+select = ["ALL"]
+
+[lint.flake8-annotations]
+allow-star-arg-any = true
+
+[lint.isort]
+known-first-party = ["target_clickhouse"]
+
+[lint.pylint]
+max-args = 6

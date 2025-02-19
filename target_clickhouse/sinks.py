@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from logging import Logger
-from typing import Any, Iterable
+from typing import Any
 
 import jsonschema.exceptions as jsonschema_exceptions
 import simplejson as json
@@ -32,7 +33,8 @@ class ClickhouseSink(SQLSink):
 
     @property
     def full_table_name(self) -> str:
-        """Return the fully qualified table name.
+        """
+        Return the fully qualified table name.
 
         Returns
             The fully qualified table name.
@@ -56,12 +58,13 @@ class ClickhouseSink(SQLSink):
         return DatetimeErrorTreatmentEnum.NULL
 
     def bulk_insert_records(
-            self,
-            full_table_name: str,
-            schema: dict,
-            records: Iterable[dict[str, Any]],
-        ) -> int | None:
-        """Bulk insert records to an existing destination table.
+        self,
+        full_table_name: str,
+        schema: dict,
+        records: Iterable[dict[str, Any]],
+    ) -> int | None:
+        """
+        Bulk insert records to an existing destination table.
 
         The default implementation uses a generic SQLAlchemy bulk insert operation.
         This method may optionally be overridden by developers in order to provide
@@ -80,21 +83,21 @@ class ClickhouseSink(SQLSink):
         # Need to convert any records with a dict type to a JSON string.
         for record in records:
             for key, value in record.items():
-                if isinstance(value, (dict, list)):
+                if isinstance(value, dict | list):
                     record[key] = json.dumps(value)
 
         res = super().bulk_insert_records(full_table_name, schema, records)
 
         if self.config.get("optimize_after", False):
-            with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
+            with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
                 self.logger.info("Optimizing table: %s", self.full_table_name)
-                conn.execute(sqlalchemy.text(
-                    f"OPTIMIZE TABLE {self.full_table_name}"))
+                conn.execute(sqlalchemy.text(f"OPTIMIZE TABLE {self.full_table_name}"))
 
         return res
 
     def activate_version(self, new_version: int) -> None:
-        """Bump the active version of the target table.
+        """
+        Bump the active version of the target table.
 
         Args:
             new_version: The version number to activate.
@@ -118,7 +121,7 @@ class ClickhouseSink(SQLSink):
             )
 
         if self.config.get("hard_delete", True):
-            with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
+            with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
                 conn.execute(
                     sqlalchemy.text(
                         f"ALTER TABLE {self.full_table_name} DELETE "
@@ -147,11 +150,12 @@ class ClickhouseSink(SQLSink):
             bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
             bindparam("version", value=new_version, type_=sqlalchemy.types.Integer),
         )
-        with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
+        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             conn.execute(query)
 
     def _validate_and_parse(self, record: dict) -> dict:
-        """Pre-validate and repair records for string type mismatches, then validate.
+        """
+        Pre-validate and repair records for string type mismatches, then validate.
 
         Args:
             record: Individual record in the stream.
@@ -173,7 +177,7 @@ class ClickhouseSink(SQLSink):
         except jsonschema_exceptions.ValidationError as e:
             if self.logger:
                 self.logger.exception(f"Record failed validation: {record}")
-            raise e # : RERAISES
+            raise e  # : RERAISES
 
         return record
 
@@ -183,7 +187,8 @@ class ClickhouseSink(SQLSink):
         schema: dict,
         treatment: DatetimeErrorTreatmentEnum,
     ) -> None:
-        """Parse strings to datetime.datetime values, repairing or erroring on failure.
+        """
+        Parse strings to datetime.datetime values, repairing or erroring on failure.
 
         Attempts to parse every field that is of type date/datetime/time. If its value
         is out of range, repair logic will be driven by the `treatment` input arg:
@@ -237,7 +242,8 @@ def pre_validate_for_string_type(
     schema: dict,
     logger: Logger | None = None,
 ) -> dict:
-    """Pre-validate record for string type mismatches and correct them.
+    """
+    Pre-validate record for string type mismatches and correct them.
 
     Args:
         record: Individual record in the stream.
@@ -284,7 +290,8 @@ def pre_validate_for_string_type(
             # Convert the value to string if it's not already a string.
             record[key] = (
                 json.dumps(record[key])
-                if isinstance(value, (dict, list)) else str(value)
+                if isinstance(value, dict | list)
+                else str(value)
             )
             if logger:
                 logger.debug(

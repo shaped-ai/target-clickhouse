@@ -1,0 +1,23 @@
+changelog:
+  categories:
+    - title: 🚀 Features
+      labels:
+        - feature
+    - title: 🐛 Bug Fixes
+      labels:
+        - fix
+        - bug
+    - title: 📝 Documentation
+      labels:
+        - documentation
+        - docs
+    - title: ⬆️ Dependencies
+      labels:
+        - dependencies
+        - dep
+    - title: 💥 Breaking Changes
+      labels:
+        - breaking
+    - title: Other Changes
+      labels:
+        - "*"

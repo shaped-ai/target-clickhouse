@@ -1,19 +1,23 @@
 """Test Configuration."""
+
 from pathlib import Path
 
 from singer_sdk.testing.templates import TargetFileTestTemplate
 
 pytest_plugins = ()
 
+
 class TargetClickhouseFileTestTemplate(TargetFileTestTemplate):
-    """Base Target File Test Template.
+    """
+    Base Target File Test Template.
 
     Use this when sourcing Target test input from a .singer file.
     """
 
     @property
     def singer_filepath(self):
-        """Get path to singer JSONL formatted messages file.
+        """
+        Get path to singer JSONL formatted messages file.
 
         Files will be sourced from `./target_test_streams/<test name>.singer`.
 
