@@ -56,11 +56,11 @@ class ClickhouseSink(SQLSink):
         return DatetimeErrorTreatmentEnum.NULL
 
     def bulk_insert_records(
-            self,
-            full_table_name: str,
-            schema: dict,
-            records: Iterable[dict[str, Any]],
-        ) -> int | None:
+        self,
+        full_table_name: str,
+        schema: dict,
+        records: Iterable[dict[str, Any]],
+    ) -> int | None:
         """Bulk insert records to an existing destination table.
 
         The default implementation uses a generic SQLAlchemy bulk insert operation.
@@ -86,10 +86,9 @@ class ClickhouseSink(SQLSink):
         res = super().bulk_insert_records(full_table_name, schema, records)
 
         if self.config.get("optimize_after", False):
-            with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
+            with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
                 self.logger.info("Optimizing table: %s", self.full_table_name)
-                conn.execute(sqlalchemy.text(
-                    f"OPTIMIZE TABLE {self.full_table_name}"))
+                conn.execute(sqlalchemy.text(f"OPTIMIZE TABLE {self.full_table_name}"))
 
         return res
 
@@ -118,7 +117,7 @@ class ClickhouseSink(SQLSink):
             )
 
         if self.config.get("hard_delete", True):
-            with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
+            with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
                 conn.execute(
                     sqlalchemy.text(
                         f"ALTER TABLE {self.full_table_name} DELETE "
@@ -147,7 +146,7 @@ class ClickhouseSink(SQLSink):
             bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
             bindparam("version", value=new_version, type_=sqlalchemy.types.Integer),
         )
-        with self.connector._connect() as conn, conn.begin(): # noqa: SLF001
+        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             conn.execute(query)
 
     def _validate_and_parse(self, record: dict) -> dict:
@@ -173,7 +172,7 @@ class ClickhouseSink(SQLSink):
         except jsonschema_exceptions.ValidationError as e:
             if self.logger:
                 self.logger.exception(f"Record failed validation: {record}")
-            raise e # : RERAISES
+            raise e  # : RERAISES
 
         return record
 
@@ -284,7 +283,8 @@ def pre_validate_for_string_type(
             # Convert the value to string if it's not already a string.
             record[key] = (
                 json.dumps(record[key])
-                if isinstance(value, (dict, list)) else str(value)
+                if isinstance(value, (dict, list))
+                else str(value)
             )
             if logger:
                 logger.debug(
