@@ -191,7 +191,10 @@ class ClickhouseConnector(SQLConnector):
             raise RuntimeError(msg) from e
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
-            sql_type = self.to_sql_type(property_jsonschema)
+            sql_type = self.to_sql_type(
+                property_jsonschema,
+                is_primary_key=is_primary_key,
+            )
             columns.append(
                 Column(
                     property_name,
