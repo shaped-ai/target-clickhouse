@@ -52,6 +52,8 @@ ignore = [
     "ANN202",
     "C901",
     "TRY201", # Use of bare 'except'
+    "D417",
+    "ANN003",
     "FBT001",
     "FBT002",
 ]

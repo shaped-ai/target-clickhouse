@@ -81,7 +81,7 @@ class ClickhouseConnector(SQLConnector):
     def to_sql_type(
         self,
         jsonschema_type: dict,
-        is_primary_key: bool = False,
+        **kwargs,
     ) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
@@ -90,13 +90,13 @@ class ClickhouseConnector(SQLConnector):
 
         Args:
             jsonschema_type: The JSON Schema representation of the source type.
-            is_primary_key: True if the column is a primary key.
 
         Returns:
             The SQLAlchemy type representation of the data type.
 
         """
         sql_type = th.to_sql_type(jsonschema_type)
+        is_primary_key = kwargs.get("is_primary_key", False)
 
         # Clickhouse does not support the DECIMAL type without providing precision,
         # so we need to use the FLOAT type.
@@ -110,7 +110,7 @@ class ClickhouseConnector(SQLConnector):
                 sqlalchemy.types.TypeEngine,
                 clickhouse_sqlalchemy_types.Int64(),
             )
-        elif type(sql_type) == sqlalchemy.types.DATE and not is_primary_key:
+        elif type(sql_type) == sqlalchemy.types.DATE:
             sql_type = typing.cast(
                 sqlalchemy.types.TypeEngine,
                 clickhouse_sqlalchemy_types.Nullable(clickhouse_sqlalchemy_types.Date32)
@@ -191,12 +191,11 @@ class ClickhouseConnector(SQLConnector):
             raise RuntimeError(msg) from e
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
+            sql_type = self.to_sql_type(property_jsonschema)
             columns.append(
                 Column(
                     property_name,
-                    self.to_sql_type(
-                        property_jsonschema, is_primary_key=is_primary_key,
-                    ),
+                    sql_type,
                     primary_key=is_primary_key,
                 ),
             )
