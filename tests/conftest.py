@@ -1,9 +1,11 @@
 """Test Configuration."""
+
 from pathlib import Path
 
 from singer_sdk.testing.templates import TargetFileTestTemplate
 
 pytest_plugins = ()
+
 
 class TargetClickhouseFileTestTemplate(TargetFileTestTemplate):
     """Base Target File Test Template.

@@ -23,11 +23,13 @@ ENGINE_MAPPING = {
     SupportedEngines.SUMMING_MERGE_TREE: engines.SummingMergeTree,
     SupportedEngines.AGGREGATING_MERGE_TREE: engines.AggregatingMergeTree,
     SupportedEngines.REPLICATED_MERGE_TREE: engines.ReplicatedMergeTree,
-    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE:
-        engines.ReplicatedReplacingMergeTree,
+    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE: (
+        engines.ReplicatedReplacingMergeTree
+    ),
     SupportedEngines.REPLICATED_SUMMING_MERGE_TREE: engines.ReplicatedSummingMergeTree,
-    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE:
-        engines.ReplicatedAggregatingMergeTree,
+    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE: (
+        engines.ReplicatedAggregatingMergeTree
+    ),
 }
 
 
