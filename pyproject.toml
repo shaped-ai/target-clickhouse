@@ -52,7 +52,8 @@ ignore = [
     "ANN202",
     "C901",
     "TRY201", # Use of bare 'except'
-    "FBT001"
+    "FBT001",
+    "FBT002",
 ]
 select = ["ALL"]
 src = ["target_clickhouse"]

@@ -81,7 +81,7 @@ class ClickhouseConnector(SQLConnector):
     def to_sql_type(
         self,
         jsonschema_type: dict,
-        is_primary_key: bool,
+        is_primary_key: bool = False,
     ) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
@@ -137,7 +137,7 @@ class ClickhouseConnector(SQLConnector):
         schema: dict,
         primary_keys: list[str] | None = None,
         partition_keys: list[str] | None = None,
-        as_temp_table: bool = False,  # noqa: FBT002
+        as_temp_table: bool = False,
     ) -> None:
         """Create an empty target table, using Clickhouse Engine.
 
