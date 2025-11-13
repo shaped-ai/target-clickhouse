@@ -21,6 +21,7 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.sinks import SQLSink
 from sqlalchemy.sql.expression import bindparam
+from sqlalchemy.sql.operators import contains
 
 from target_clickhouse.connectors import ClickhouseConnector
 
@@ -49,6 +50,17 @@ class ClickhouseSink(SQLSink):
             schema_name=self.schema_name,
             db_name=self.database_name,
         )
+
+    def clickhouse_table_engine(self) -> str | None:
+        """Return the ClickHouse table engine for the current table."""
+        query = (
+            f"SELECT engine FROM system.tables "
+            f"WHERE database = '{self.database_name}' "
+            f"AND name = '{self.table_name}'"
+        )
+        with self.connector._connect() as conn:
+            result = conn.execute(sqlalchemy.text(query)).fetchone()
+            return result[0] if result else None
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
@@ -102,6 +114,10 @@ class ClickhouseSink(SQLSink):
         # There's nothing to do if the table doesn't exist yet
         # (which it won't the first time the stream is processed)
         if not self.connector.table_exists(self.full_table_name):
+            return
+
+        if self.clickhouse_table_engine() and "ReplacingMergeTree" in self.clickhouse_table_engine():
+            # No need to manually handle versioning with ReplacingMergeTree engine
             return
 
         deleted_at = now()
