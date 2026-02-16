@@ -218,17 +218,6 @@ class ClickhouseConnector(SQLConnector):
         _ = Table(table_name, meta, *columns, table_engine, **table_args)
         meta.create_all(self._engine)
 
-    def prepare_schema(self, _: str) -> None:
-        """Create the target database schema.
-
-        In Clickhouse, a schema is a database, so this method is a no-op.
-
-        Args:
-            schema_name: The target schema name.
-
-        """
-        return
-
     def prepare_column(
         self,
         full_table_name: str,
@@ -284,10 +273,7 @@ class ClickhouseConnector(SQLConnector):
             ),
         )
         return sqlalchemy.DDL(
-            (
-                "ALTER TABLE %(table_name)s ADD COLUMN IF NOT EXISTS "
-                "%(create_column_clause)s"
-            ),
+            ("ALTER TABLE %(table_name)s ADD COLUMN IF NOT EXISTS %(create_column_clause)s"),
             {
                 "table_name": table_name,
                 "create_column_clause": create_column_clause,
