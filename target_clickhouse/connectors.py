@@ -11,7 +11,9 @@ from clickhouse_sqlalchemy import (
 from clickhouse_sqlalchemy import (
     types as clickhouse_sqlalchemy_types,
 )
-from pkg_resources import get_distribution, parse_version
+from importlib.metadata import version as get_version
+
+from packaging.version import Version
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import Column, MetaData, create_engine
@@ -167,9 +169,9 @@ class ClickhouseConnector(SQLConnector):
 
         # Do not set schema, as it is not supported by Clickhouse.
         # Get the version of sqlalchemy
-        sqlalchemy_version = get_distribution("sqlalchemy").version
-        parsed_version = parse_version(sqlalchemy_version)
-        if parsed_version < parse_version("2.0"):
+        sqlalchemy_version = get_version("sqlalchemy")
+        parsed_version = Version(sqlalchemy_version)
+        if parsed_version < Version("2.0"):
             # Code for sqlalchemy 1.0 compatibility.
             meta = MetaData(schema=None, bind=self._engine)
         else:
