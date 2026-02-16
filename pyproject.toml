@@ -1,39 +1,57 @@
-[tool.poetry]
+[project]
 name = "shaped-target-clickhouse"
 version = "0.2.5"
 description = "`target-clickhouse` is a Singer target for clickhouse, built with the Meltano Singer SDK."
+authors = [{ name = "Ben Theunissen" }]
+requires-python = "<3.12,>=3.8.0"
 readme = "README.md"
-authors = ["Ben Theunissen"]
+license = "Apache-2.0"
 keywords = [
     "ELT",
     "clickhouse",
 ]
-license = "Apache-2.0"
-packages = [
-    { include = "target_clickhouse" },
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "singer-sdk>=0.40,<0.45",
+    "clickhouse-sqlalchemy",
+    "simplejson>=3.19.2,<4",
+    "pendulum>=2.1,<4",
+    "packaging>=24.0",
 ]
 
-[tool.poetry.dependencies]
-python = "<3.12,>=3.8.0"
-singer-sdk = { version=">=0.40,<0.45" }
-fs-s3fs = { version = "^1.1.1", optional = true }
+[project.optional-dependencies]
+s3 = ["fs-s3fs>=1.1.1,<2"]
+
+[project.scripts]
+target-clickhouse = "target_clickhouse.target:TargetClickhouse.cli"
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.3,<8",
+    "tox>=3.25.0,<4",
+    "ruff>=0.1.3,<0.2",
+    "singer-sdk[testing]>=0.40,<0.45",
+    "types-simplejson>=3.19.0.1,<4",
+    "types-setuptools>=69.2.0.20240317,<70",
+    "pre-commit>=3.5.0,<4",
+]
+
+[tool.uv.sources]
 clickhouse-sqlalchemy = { git = "https://github.com/xzkostyan/clickhouse-sqlalchemy.git", rev = "7ad94b0" }
 
-simplejson = "^3.19.2"
-pendulum = ">=2.1,<4"
-packaging = ">=24.0"
+[tool.uv.build-backend]
+module-name = ["target_clickhouse"]
+module-root = ""
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.4.3"
-tox = "^3.25.0"
-ruff = "^0.1.3"
-singer-sdk = { version=">=0.40,<0.45", extras = ["testing"] }
-types-simplejson = "^3.19.0.1"
-types-setuptools = "^69.2.0.20240317"
-pre-commit = "^3.5.0"
-
-[tool.poetry.extras]
-s3 = ["fs-s3fs"]
+[build-system]
+requires = ["uv_build>=0.9.27,<0.10.0"]
+build-backend = "uv_build"
 
 [tool.ruff]
 ignore = [
@@ -75,11 +93,3 @@ max-args=6
 [[tool.mypy.overrides]]
 disable_error_code = ["name-defined"]
 ignore_missing_imports = true
-
-[build-system]
-requires = ["poetry-core>=1.5.1"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-# CLI declaration
-target-clickhouse = 'target_clickhouse.target:TargetClickhouse.cli'
