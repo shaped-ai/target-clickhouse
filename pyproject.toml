@@ -3,7 +3,7 @@ name = "shaped-target-clickhouse"
 version = "0.2.5"
 description = "`target-clickhouse` is a Singer target for clickhouse, built with the Meltano Singer SDK."
 authors = [{ name = "Ben Theunissen" }]
-requires-python = "<3.12,>=3.8.0"
+requires-python = ">=3.10,<3.14"
 readme = "README.md"
 license = "Apache-2.0"
 keywords = [
@@ -12,13 +12,13 @@ keywords = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "singer-sdk>=0.40,<0.45",
+    "singer-sdk>=0.40,<0.54",
     "clickhouse-sqlalchemy",
     "simplejson>=3.19.2,<4",
     "pendulum>=2.1,<4",
@@ -33,10 +33,10 @@ target-clickhouse = "target_clickhouse.target:TargetClickhouse.cli"
 
 [dependency-groups]
 dev = [
-    "pytest>=7.4.3,<8",
+    "pytest>=9,<10",
     "tox>=3.25.0,<4",
     "ruff>=0.1.3,<0.2",
-    "singer-sdk[testing]>=0.40,<0.45",
+    "singer-sdk[testing]>=0.40,<0.54",
     "types-simplejson>=3.19.0.1,<4",
     "types-setuptools>=69.2.0.20240317,<70",
     "pre-commit>=3.5.0,<4",
