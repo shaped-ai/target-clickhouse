@@ -4,6 +4,7 @@ import contextlib
 import typing
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 import sqlalchemy.types
 from clickhouse_sqlalchemy import (
     Table,
@@ -34,6 +35,7 @@ class ClickhouseConnector(SQLConnector):
     allow_column_alter: bool = True  # Whether altering column types is supported.
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
+    _cols_by_table = {} # cache of cols for a table
 
     def get_sqlalchemy_url(self, config: dict) -> str:
         """Generates a SQLAlchemy URL for clickhouse.
@@ -228,6 +230,16 @@ class ClickhouseConnector(SQLConnector):
 
         """
         return
+
+    def get_table_columns(
+        self,
+        full_table_name: str,
+        column_names: list[str] | None = None,
+    ) -> dict[str, sa.Column]:
+        '''override this method so we can cache it'''
+        if full_table_name not in self._cols_by_table:
+            self._cols_by_table[full_table_name] = super().get_table_columns(full_table_name)
+        return self._cols_by_table[full_table_name]
 
     def prepare_column(
         self,
