@@ -88,7 +88,7 @@ class ClickhouseSink(SQLSink):
         if self.config.get("optimize_after", False):
             with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
                 self.logger.info("Optimizing table: %s", self.full_table_name)
-                conn.execute(sqlalchemy.text(f"OPTIMIZE TABLE {self.full_table_name}"))
+            conn.execute(sqlalchemy.text(f"OPTIMIZE TABLE {self.full_table_name} FINAL SETTINGS alter_sync=1"))  # noqa: E501
 
         return res
 
