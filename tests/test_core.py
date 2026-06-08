@@ -45,7 +45,7 @@ StandardTargetTests = get_target_test_class(
 
 
 class TestStandardTargetClickhouse(
-    StandardTargetTests, # type: ignore[misc, valid-type]
+    StandardTargetTests,  # type: ignore[misc, valid-type]
 ):
     """Standard Target Tests."""
 

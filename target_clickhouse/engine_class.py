@@ -23,11 +23,13 @@ ENGINE_MAPPING = {
     SupportedEngines.SUMMING_MERGE_TREE: engines.SummingMergeTree,
     SupportedEngines.AGGREGATING_MERGE_TREE: engines.AggregatingMergeTree,
     SupportedEngines.REPLICATED_MERGE_TREE: engines.ReplicatedMergeTree,
-    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE:
-        engines.ReplicatedReplacingMergeTree,
+    SupportedEngines.REPLICATED_REPLACING_MERGE_TREE: (
+        engines.ReplicatedReplacingMergeTree
+    ),
     SupportedEngines.REPLICATED_SUMMING_MERGE_TREE: engines.ReplicatedSummingMergeTree,
-    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE:
-        engines.ReplicatedAggregatingMergeTree,
+    SupportedEngines.REPLICATED_AGGREGATING_MERGE_TREE: (
+        engines.ReplicatedAggregatingMergeTree
+    ),
 }
 
 
@@ -44,6 +46,7 @@ def create_engine_wrapper(
     primary_keys: List[str],
     table_name: str,
     config: Optional[dict] = None,
+    order_by_keys: Optional[List[str]] = None,
 ):
     # check if engine type is in supported engines
     if is_supported_engine(engine_type) is False:
@@ -57,6 +60,9 @@ def create_engine_wrapper(
         # If no primary keys are specified,
         # then Clickhouse expects the data to be indexed on all fields via tuple().
         engine_args["order_by"] = func.tuple()
+
+    if order_by_keys is not None:
+        engine_args["order_by"] = order_by_keys
 
     if config is not None:
         if engine_type in (
